@@ -136,7 +136,7 @@ pipeline {
 
                     echo "Deploying DB to DEV..."
 
-                    ./jenkins/deploy-ecs-image.sh \
+                    ./APP-1/deploy-ecs-image.sh \
                         "$PROJECT-dev-cluster" \
                         "$PROJECT-dev-db-service" \
                         "$DB_IMAGE" \
@@ -164,7 +164,7 @@ pipeline {
 
                     echo "Deploying DB to QA..."
 
-                    ./jenkins/deploy-ecs-image.sh \
+                    ./APP-1/deploy-ecs-image.sh \
                         "$PROJECT-qa-cluster" \
                         "$PROJECT-qa-db-service" \
                         "$DB_IMAGE" \
@@ -192,7 +192,7 @@ pipeline {
 
                     echo "Deploying DB to UAT..."
 
-                    ./jenkins/deploy-ecs-image.sh \
+                    ./APP-1/deploy-ecs-image.sh \
                         "$PROJECT-uat-cluster" \
                         "$PROJECT-uat-db-service" \
                         "$DB_IMAGE" \
@@ -239,7 +239,7 @@ pipeline {
 
                     echo "Deploying DB to PROD..."
 
-                    ./jenkins/deploy-ecs-image.sh \
+                    ./APP-1/deploy-ecs-image.sh \
                         "$PROJECT-prod-cluster" \
                         "$PROJECT-prod-db-service" \
                         "$DB_IMAGE" \
