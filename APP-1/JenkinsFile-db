@@ -40,6 +40,18 @@ pipeline {
                 checkout scm
             }
         }
+       stage('Prepare Deployment Script') {
+    steps {
+        sh '''
+            set -e
+
+            chmod +x ./APP-1/deploy-ecs-image.sh
+
+            ls -l ./APP-1/deploy-ecs-image.sh
+        '''
+    }
+}
+
 
         /*
          * IMAGE TAG
