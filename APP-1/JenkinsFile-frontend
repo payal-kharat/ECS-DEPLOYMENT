@@ -1,0 +1,306 @@
+pipeline {
+    agent any
+
+    parameters {
+
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['DEV', 'QA', 'UAT', 'PROD'],
+            description: 'Select the environment where you want to deploy frontend'
+        )
+
+        string(
+            name: 'IMAGE_TAG',
+            defaultValue: '',
+            description: 'Leave empty to use Jenkins BUILD_NUMBER'
+        )
+    }
+
+    environment {
+        AWS_REGION = 'us-east-1'
+        AWS_ACCOUNT_ID = '552940445807'
+
+        ECR_REGISTRY = '552940445807.dkr.ecr.us-east-1.amazonaws.com'
+        ECR_REPOSITORY = 'jenkins-ecs-deployment-frontend'
+
+        PROJECT = 'jenkins-ecs-deployment'
+
+        FRONTEND_CONTAINER = 'frontend'
+
+        FRONTEND_CONTEXT = './APP-1/nginx-flask-mysql/proxy'
+    }
+
+    stages {
+
+        /*
+         * CHECKOUT
+         */
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        /*
+         * SET IMAGE TAG
+         */
+        stage('Set Image Tag') {
+            steps {
+                script {
+
+                    if (params.IMAGE_TAG?.trim()) {
+                        env.IMAGE_TAG = params.IMAGE_TAG.trim()
+                    } else {
+                        env.IMAGE_TAG = "${BUILD_NUMBER}"
+                    }
+
+                    env.FRONTEND_IMAGE =
+                        "${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+
+                    echo "========================================"
+                    echo "Environment : ${params.ENVIRONMENT}"
+                    echo "Image Tag   : ${env.IMAGE_TAG}"
+                    echo "Frontend Image:"
+                    echo "${env.FRONTEND_IMAGE}"
+                    echo "========================================"
+                }
+            }
+        }
+
+        /*
+         * ECR LOGIN
+         */
+        stage('ECR Login') {
+            steps {
+                sh '''
+                    set -e
+
+                    aws ecr get-login-password \
+                        --region "$AWS_REGION" |
+                    docker login \
+                        --username AWS \
+                        --password-stdin "$ECR_REGISTRY"
+                '''
+            }
+        }
+
+        /*
+         * BUILD FRONTEND IMAGE
+         */
+        stage('Build Frontend Image') {
+            steps {
+                sh '''
+                    set -e
+
+                    echo "Building frontend image..."
+
+                    docker build \
+                        -t "$FRONTEND_IMAGE" \
+                        "$FRONTEND_CONTEXT"
+
+                    echo "Frontend image built successfully."
+                '''
+            }
+        }
+
+        /*
+         * PUSH FRONTEND IMAGE
+         */
+        stage('Push Frontend Image') {
+            steps {
+                sh '''
+                    set -e
+
+                    echo "Pushing frontend image..."
+
+                    docker push "$FRONTEND_IMAGE"
+
+                    echo "Frontend image pushed successfully."
+                '''
+            }
+        }
+
+        /*
+         * DEV DEPLOYMENT
+         */
+        stage('Deploy DEV') {
+
+            when {
+                expression {
+                    params.ENVIRONMENT == 'DEV'
+                }
+            }
+
+            steps {
+                sh '''
+                    set -e
+
+                    echo "Deploying frontend to DEV..."
+
+                    ./jenkins/deploy-ecs-image.sh \
+                        "$PROJECT-dev-cluster" \
+                        "$PROJECT-dev-frontend-service" \
+                        "$FRONTEND_IMAGE" \
+                        "$FRONTEND_CONTAINER"
+
+                    echo "DEV frontend deployment completed."
+                '''
+            }
+        }
+
+        /*
+         * QA DEPLOYMENT
+         */
+        stage('Deploy QA') {
+
+            when {
+                expression {
+                    params.ENVIRONMENT == 'QA'
+                }
+            }
+
+            steps {
+                sh '''
+                    set -e
+
+                    echo "Deploying frontend to QA..."
+
+                    ./jenkins/deploy-ecs-image.sh \
+                        "$PROJECT-qa-cluster" \
+                        "$PROJECT-qa-frontend-service" \
+                        "$FRONTEND_IMAGE" \
+                        "$FRONTEND_CONTAINER"
+
+                    echo "QA frontend deployment completed."
+                '''
+            }
+        }
+
+        /*
+         * UAT DEPLOYMENT
+         */
+        stage('Deploy UAT') {
+
+            when {
+                expression {
+                    params.ENVIRONMENT == 'UAT'
+                }
+            }
+
+            steps {
+                sh '''
+                    set -e
+
+                    echo "Deploying frontend to UAT..."
+
+                    ./jenkins/deploy-ecs-image.sh \
+                        "$PROJECT-uat-cluster" \
+                        "$PROJECT-uat-frontend-service" \
+                        "$FRONTEND_IMAGE" \
+                        "$FRONTEND_CONTAINER"
+
+                    echo "UAT frontend deployment completed."
+                '''
+            }
+        }
+
+        /*
+         * PROD APPROVAL
+         */
+        stage('Approve PROD Deployment') {
+
+            when {
+                expression {
+                    params.ENVIRONMENT == 'PROD'
+                }
+            }
+
+            steps {
+                input(
+                    message: "Approve deployment of ${env.FRONTEND_IMAGE} to PROD?",
+                    ok: "Approve PROD Deployment"
+                )
+            }
+        }
+
+        /*
+         * PROD DEPLOYMENT
+         */
+        stage('Deploy PROD') {
+
+            when {
+                expression {
+                    params.ENVIRONMENT == 'PROD'
+                }
+            }
+
+            steps {
+                sh '''
+                    set -e
+
+                    echo "Deploying frontend to PROD..."
+
+                    ./jenkins/deploy-ecs-image.sh \
+                        "$PROJECT-prod-cluster" \
+                        "$PROJECT-prod-frontend-service" \
+                        "$FRONTEND_IMAGE" \
+                        "$FRONTEND_CONTAINER"
+
+                    echo "PROD frontend deployment completed."
+                '''
+            }
+        }
+    }
+
+    /*
+     * POST ACTIONS
+     */
+    post {
+
+        success {
+            echo """
+            ================================================
+            FRONTEND PIPELINE SUCCESS
+            ================================================
+
+            Environment:
+            ${params.ENVIRONMENT}
+
+            Image:
+            ${env.FRONTEND_IMAGE}
+
+            Frontend deployment completed successfully.
+
+            ================================================
+            """
+        }
+
+        failure {
+            echo """
+            ================================================
+            FRONTEND PIPELINE FAILED
+            ================================================
+
+            Environment:
+            ${params.ENVIRONMENT}
+
+            Check the Jenkins console output.
+
+            ================================================
+            """
+        }
+
+        aborted {
+            echo """
+            ================================================
+            FRONTEND PIPELINE ABORTED
+            ================================================
+
+            Environment:
+            ${params.ENVIRONMENT}
+
+            ================================================
+            """
+        }
+    }
+}
