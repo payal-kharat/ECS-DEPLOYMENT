@@ -21,9 +21,9 @@ pipeline {
 
         // IMPORTANT:
         // Replace these 3 values with your actual ECS names.
-        ECS_CLUSTER = 'YOUR_ECS_CLUSTER'
-        BACKEND_SERVICE = 'YOUR_BACKEND_SERVICE'
-        FRONTEND_SERVICE = 'YOUR_FRONTEND_SERVICE'
+        ECS_CLUSTER = 'jenkins-ecs-deployment-dev-cluster'
+        BACKEND_SERVICE = 'jenkins-ecs-deployment-dev-backend-service'
+        FRONTEND_SERVICE = 'jenkins-ecs-deployment-dev-frontend-service'
 
         // Jenkins build number becomes Docker image tag
         IMAGE_TAG = "${BUILD_NUMBER}"
