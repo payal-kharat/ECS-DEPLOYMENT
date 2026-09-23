@@ -30,13 +30,19 @@ pipeline {
         BACKEND_CONTEXT = './APP-1/nginx-flask-mysql/backend'
     }
 
-    stages {
+   
+        stage('Prepare Deployment Script') {
+    steps {
+        sh '''
+            set -e
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
+            chmod +x ./APP-1/deploy-ecs-image.sh
+
+            ls -l ./APP-1/deploy-ecs-image.sh
+        '''
+    }
+}
+
 
         stage('Set Image Tag') {
             steps {
