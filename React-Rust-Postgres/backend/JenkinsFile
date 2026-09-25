@@ -29,7 +29,7 @@ pipeline {
         DB_REPOSITORY = 'employee-managemet-db'
 
         BUILD_CONTEXT =
-            './React-Rust-Postgresbackend'
+            './React-Rust-Postgres/backend'
 
         TASK_DEFINITION_TEMPLATE =
             './React-Rust-Postgres/backend/task-definition.json'
