@@ -26,7 +26,7 @@ pipeline {
         ECR_REGISTRY =
             "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-        FRONTEND_REPOSITORY = 'employee-managemet-frontend'
+        FRONTEND_REPOSITORY = 'app-4-frontend'
 
         BUILD_CONTEXT =
             './React-Rust-Postgres/frontend'
