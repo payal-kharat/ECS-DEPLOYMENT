@@ -1,0 +1,32 @@
+
+{
+  "containerDefinitions": [
+    {
+      "name": "frontend",
+      "image": "nginx:1.13-alpine",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp",
+          "name": "frontend"
+        }
+      ],
+      "essential": true,
+      "environment": [],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "systemControls": []
+    }
+  ],
+  "family": "employee-managemet-dev-frontend",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/employee-managemet-ecs-execution-role",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}
+
