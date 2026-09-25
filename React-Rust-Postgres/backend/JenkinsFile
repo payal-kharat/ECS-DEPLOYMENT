@@ -1,3 +1,4 @@
+
 pipeline {
 
     agent any
@@ -9,11 +10,12 @@ pipeline {
             choices: ['dev', 'qa', 'uat', 'prod'],
             description: 'Select environment'
         )
+
         string(
-        name: 'DEV_IMAGE_TAG',
-        defaultValue: '',
-        description: 'Enter the DEV image tag to promote, e.g. DEV-def5678'
-    )
+            name: 'DEV_IMAGE_TAG',
+            defaultValue: '',
+            description: 'Enter the DEV image tag to promote, e.g. DEV-def5678'
+        )
     }
 
     environment {
@@ -27,15 +29,14 @@ pipeline {
         DB_REPOSITORY = 'employee-managemet-db'
 
         BUILD_CONTEXT =
-            './React-Rust-Postgres/db'
+            './React-Rust-Postgresbackend'
 
         TASK_DEFINITION_TEMPLATE =
-            './React-Rust-Postgres/db/task-definition.json'
+            './React-Rust-Postgres/backend/task-definition.json'
     }
 
     stages {
 
-        stages {
         stage('DEV - Build Image') {
 
             when {
@@ -57,7 +58,7 @@ pipeline {
                         "DEV-${commitId}"
 
                     def imageUri =
-                        "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${imageTag}"
+                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${imageTag}"
 
                     echo "======================================"
                     echo "ENVIRONMENT = dev"
@@ -67,7 +68,7 @@ pipeline {
 
                     env.IMAGE_URI = imageUri
 
-                    echo "Building frontend Docker image..."
+                    echo "Building DB Docker image..."
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
@@ -85,6 +86,7 @@ pipeline {
                 }
             }
         }
+
         stage('DEV - Push Image') {
 
             when {
@@ -104,8 +106,10 @@ pipeline {
                             "Make sure the DEV - Build Image stage completed successfully."
                         )
                     }
-                    echo "Pushing frontend Docker image..."
+
+                    echo "Pushing DB Docker image..."
                     echo "IMAGE URI = ${env.IMAGE_URI}"
+
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
                         "ecr:${env.AWS_REGION}:aws-ecr-credentials"
@@ -119,163 +123,201 @@ pipeline {
                 }
             }
         }
+
         stage('QA - Promote Image') {
 
-    steps {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'qa'
+                }
+            }
 
-        script {
+            steps {
 
-            def sourceTag = params.DEV_IMAGE_TAG
+                script {
 
-            def sourceImage =
-                "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${sourceTag}"
+                    def sourceTag = params.DEV_IMAGE_TAG
 
-            def targetTag =
-                "QA-${sourceTag.replaceFirst('^DEV-', '')}"
+                    if (!sourceTag?.trim()) {
+                        error(
+                            "DEV_IMAGE_TAG is required when promoting to QA."
+                        )
+                    }
 
-            def targetImage =
-                "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${targetTag}"
+                    def sourceImage =
+                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
 
-            echo "SOURCE IMAGE = ${sourceImage}"
-            echo "TARGET IMAGE = ${targetImage}"
+                    def targetTag =
+                        "QA-${sourceTag.replaceFirst('^DEV-', '')}"
 
-            sh """
-                set -e
+                    def targetImage =
+                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
 
-                echo "Logging in to ECR..."
+                    echo "SOURCE IMAGE = ${sourceImage}"
+                    echo "TARGET IMAGE = ${targetImage}"
 
-                aws ecr get-login-password \
-                    --region ${env.AWS_REGION} | \
-                docker login \
-                    --username AWS \
-                    --password-stdin ${env.ECR_REGISTRY}
+                    sh """
+                        set -e
 
-                echo "Pulling DEV image..."
+                        echo "Logging in to ECR..."
 
-                docker pull ${sourceImage}
+                        aws ecr get-login-password \
+                            --region ${env.AWS_REGION} | \
+                        docker login \
+                            --username AWS \
+                            --password-stdin ${env.ECR_REGISTRY}
 
-                echo "Tagging image for QA..."
+                        echo "Pulling DEV image..."
 
-                docker tag \
-                    ${sourceImage} \
-                    ${targetImage}
+                        docker pull ${sourceImage}
 
-                echo "Pushing QA image..."
+                        echo "Tagging image for QA..."
 
-                docker push ${targetImage}
-            """
+                        docker tag \
+                            ${sourceImage} \
+                            ${targetImage}
 
-            env.IMAGE_URI = targetImage
+                        echo "Pushing QA image..."
 
-            echo "IMAGE_URI = ${env.IMAGE_URI}"
+                        docker push ${targetImage}
+                    """
+
+                    env.IMAGE_URI = targetImage
+
+                    echo "IMAGE_URI = ${env.IMAGE_URI}"
+                }
+            }
         }
-    }
-}
+
         stage('UAT - Promote Image') {
 
-    steps {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'uat'
+                }
+            }
 
-        script {
+            steps {
 
-             def sourceTag= params.DEV_IMAGE_TAG
+                script {
 
-            def sourceImage =
-                "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${sourceTag}"
+                    def sourceTag = params.DEV_IMAGE_TAG
 
-            def targetTag =
-                "UAT-${sourceTag.replaceFirst('^DEV-', '')}"
+                    if (!sourceTag?.trim()) {
+                        error(
+                            "DEV_IMAGE_TAG is required when promoting to UAT."
+                        )
+                    }
 
-            def targetImage =
-                "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${targetTag}"
+                    def sourceImage =
+                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
 
-            echo "SOURCE IMAGE = ${sourceImage}"
-            echo "TARGET IMAGE = ${targetImage}"
+                    def targetTag =
+                        "UAT-${sourceTag.replaceFirst('^DEV-', '')}"
 
-            sh """
-                set -e
+                    def targetImage =
+                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
 
-                echo "Logging in to ECR..."
+                    echo "SOURCE IMAGE = ${sourceImage}"
+                    echo "TARGET IMAGE = ${targetImage}"
 
-                aws ecr get-login-password \
-                    --region ${env.AWS_REGION} | \
-                docker login \
-                    --username AWS \
-                    --password-stdin ${env.ECR_REGISTRY}
+                    sh """
+                        set -e
 
-                echo "Pulling DEV image..."
+                        echo "Logging in to ECR..."
 
-                docker pull ${sourceImage}
+                        aws ecr get-login-password \
+                            --region ${env.AWS_REGION} | \
+                        docker login \
+                            --username AWS \
+                            --password-stdin ${env.ECR_REGISTRY}
 
-                echo "Tagging image for UAT..."
+                        echo "Pulling DEV image..."
 
-                docker tag \
-                    ${sourceImage} \
-                    ${targetImage}
+                        docker pull ${sourceImage}
 
-                echo "Pushing UAT image..."
+                        echo "Tagging image for UAT..."
 
-                docker push ${targetImage}
-            """
+                        docker tag \
+                            ${sourceImage} \
+                            ${targetImage}
 
-            env.IMAGE_URI = targetImage
+                        echo "Pushing UAT image..."
 
-            echo "IMAGE_URI = ${env.IMAGE_URI}"
+                        docker push ${targetImage}
+                    """
+
+                    env.IMAGE_URI = targetImage
+
+                    echo "IMAGE_URI = ${env.IMAGE_URI}"
+                }
+            }
         }
-    }
-}
 
         stage('PROD - Promote Image') {
 
-    steps {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'prod'
+                }
+            }
 
-        script {
+            steps {
 
-            def sourceTag = params.DEV_IMAGE_TAG
+                script {
 
-            def sourceImage =
-                "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${sourceTag}"
+                    def sourceTag = params.DEV_IMAGE_TAG
 
-            def targetTag =
-                "PROD-${sourceTag.replaceFirst('^DEV-', '')}"
+                    if (!sourceTag?.trim()) {
+                        error(
+                            "DEV_IMAGE_TAG is required when promoting to PROD."
+                        )
+                    }
 
-            def targetImage =
-                "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${targetTag}"
+                    def sourceImage =
+                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
 
-            echo "SOURCE IMAGE = ${sourceImage}"
-            echo "TARGET IMAGE = ${targetImage}"
+                    def targetTag =
+                        "PROD-${sourceTag.replaceFirst('^DEV-', '')}"
 
-            sh """
-                set -e
+                    def targetImage =
+                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
 
-                echo "Logging in to ECR..."
+                    echo "SOURCE IMAGE = ${sourceImage}"
+                    echo "TARGET IMAGE = ${targetImage}"
 
-                aws ecr get-login-password \
-                    --region ${env.AWS_REGION} | \
-                docker login \
-                    --username AWS \
-                    --password-stdin ${env.ECR_REGISTRY}
+                    sh """
+                        set -e
 
-                echo "Pulling DEV image..."
+                        echo "Logging in to ECR..."
 
-                docker pull ${sourceImage}
+                        aws ecr get-login-password \
+                            --region ${env.AWS_REGION} | \
+                        docker login \
+                            --username AWS \
+                            --password-stdin ${env.ECR_REGISTRY}
 
-                echo "Tagging image for PROD..."
+                        echo "Pulling DEV image..."
 
-                docker tag \
-                    ${sourceImage} \
-                    ${targetImage}
+                        docker pull ${sourceImage}
 
-                echo "Pushing PROD image..."
+                        echo "Tagging image for PROD..."
 
-                docker push ${targetImage}
-            """
+                        docker tag \
+                            ${sourceImage} \
+                            ${targetImage}
 
-            env.IMAGE_URI = targetImage
+                        echo "Pushing PROD image..."
 
-            echo "IMAGE_URI = ${env.IMAGE_URI}"
+                        docker push ${targetImage}
+                    """
+
+                    env.IMAGE_URI = targetImage
+
+                    echo "IMAGE_URI = ${env.IMAGE_URI}"
+                }
+            }
         }
-    }
-}
 
         stage('Create Task Definition') {
 
