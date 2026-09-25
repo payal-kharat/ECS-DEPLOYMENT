@@ -2,18 +2,31 @@
   "containerDefinitions": [
     {
       "name": "db",
-      "image": "mariadb:10-focal",
+      "image": "postgres:latest",
       "cpu": 0,
       "portMappings": [
         {
           "containerPort": 5432,
           "hostPort": 5432,
           "protocol": "tcp",
-          "name": "mysql"
+          "name": "postgres"
         }
       ],
       "essential": true,
-      "environment": [],
+      "environment": [
+        {
+          "name": "POSTGRES_PASSWORD",
+          "value": "mysecretpassword"
+        },
+        {
+          "name": "PGDATA",
+          "value": "/var/lib/postgresql/data/pgdata"
+        },
+        {
+          "name": "POSTGRES_DB",
+          "value": "postgres"
+        }
+      ],
       "mountPoints": [],
       "volumesFrom": [],
       "systemControls": []
