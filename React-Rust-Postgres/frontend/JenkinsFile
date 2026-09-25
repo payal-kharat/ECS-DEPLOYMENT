@@ -481,13 +481,13 @@ PY
                         params.ENVIRONMENT
 
                     def cluster =
-                        "employee-managemet-${environment}-cluster"
+                        "app-4-${environment}-cluster"
 
                     def service =
-                        "employee-managemet-${environment}-frontend-service"
+                        "app-4-${environment}-frontend-service"
 
                     def taskFamily =
-                        "employee-managemet-${environment}-frontend"
+                        "app-4-${environment}-frontend"
 
                     echo "======================================"
                     echo "ENVIRONMENT  = ${environment}"
