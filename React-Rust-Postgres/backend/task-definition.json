@@ -1,0 +1,43 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "db",
+      "image": "postgres:latest",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "containerPort": 5432,
+          "hostPort": 5432,
+          "protocol": "tcp",
+          "name": "postgres"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "POSTGRES_PASSWORD",
+          "value": "mysecretpassword"
+        },
+        {
+          "name": "PGDATA",
+          "value": "/var/lib/postgresql/data/pgdata"
+        },
+        {
+          "name": "POSTGRES_DB",
+          "value": "postgres"
+        }
+      ],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "systemControls": []
+    }
+  ],
+  "family": "employee-managemet-${ENV}-db",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/employee-managemet-ecs-execution-role",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}
