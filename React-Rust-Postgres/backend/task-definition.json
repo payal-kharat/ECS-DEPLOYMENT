@@ -44,14 +44,13 @@
       "systemControls": []
     }
   ],
-  "family": "APP-4-dev-backend",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/APP-4-ecs-execution-role",
+  "family": "app-4-dev-backend",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/app-4-ecs-execution-role",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
   ],
   "cpu": "256",
   "memory": "512"
-  
 }
 
