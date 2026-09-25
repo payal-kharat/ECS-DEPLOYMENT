@@ -14,7 +14,7 @@ pipeline {
         string(
             name: 'DEV_IMAGE_TAG',
             defaultValue: '',
-            description: 'Enter the DEV image tag to promote, e.g. DEV-def5678'
+            description: 'Enter the DEV image tag to promote, e.g. DEV-370e229'
         )
     }
 
@@ -26,7 +26,7 @@ pipeline {
         ECR_REGISTRY =
             "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-        DB_REPOSITORY = 'employee-managemet-db'
+        FRONTEND_REPOSITORY = 'employee-managemet-frontend'
 
         BUILD_CONTEXT =
             './React-Rust-Postgres/frontend'
@@ -36,6 +36,12 @@ pipeline {
     }
 
     stages {
+
+        /*
+         * ============================================================
+         * DEV - BUILD
+         * ============================================================
+         */
 
         stage('DEV - Build Image') {
 
@@ -58,7 +64,7 @@ pipeline {
                         "DEV-${commitId}"
 
                     def imageUri =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${imageTag}"
+                        "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${imageTag}"
 
                     echo "======================================"
                     echo "ENVIRONMENT = dev"
@@ -68,7 +74,7 @@ pipeline {
 
                     env.IMAGE_URI = imageUri
 
-                    echo "Building DB Docker image..."
+                    echo "Building FRONTEND Docker image..."
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
@@ -86,6 +92,13 @@ pipeline {
                 }
             }
         }
+
+
+        /*
+         * ============================================================
+         * DEV - PUSH
+         * ============================================================
+         */
 
         stage('DEV - Push Image') {
 
@@ -107,7 +120,7 @@ pipeline {
                         )
                     }
 
-                    echo "Pushing DB Docker image..."
+                    echo "Pushing FRONTEND Docker image..."
                     echo "IMAGE URI = ${env.IMAGE_URI}"
 
                     docker.withRegistry(
@@ -124,6 +137,13 @@ pipeline {
             }
         }
 
+
+        /*
+         * ============================================================
+         * QA - PROMOTE
+         * ============================================================
+         */
+
         stage('QA - Promote Image') {
 
             when {
@@ -139,19 +159,20 @@ pipeline {
                     def sourceTag = params.DEV_IMAGE_TAG
 
                     if (!sourceTag?.trim()) {
+
                         error(
                             "DEV_IMAGE_TAG is required when promoting to QA."
                         )
                     }
 
                     def sourceImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
+                        "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${sourceTag}"
 
                     def targetTag =
                         "QA-${sourceTag.replaceFirst('^DEV-', '')}"
 
                     def targetImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
+                        "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${targetTag}"
 
                     echo "SOURCE IMAGE = ${sourceImage}"
                     echo "TARGET IMAGE = ${targetImage}"
@@ -189,6 +210,13 @@ pipeline {
             }
         }
 
+
+        /*
+         * ============================================================
+         * UAT - PROMOTE
+         * ============================================================
+         */
+
         stage('UAT - Promote Image') {
 
             when {
@@ -204,19 +232,20 @@ pipeline {
                     def sourceTag = params.DEV_IMAGE_TAG
 
                     if (!sourceTag?.trim()) {
+
                         error(
                             "DEV_IMAGE_TAG is required when promoting to UAT."
                         )
                     }
 
                     def sourceImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
+                        "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${sourceTag}"
 
                     def targetTag =
                         "UAT-${sourceTag.replaceFirst('^DEV-', '')}"
 
                     def targetImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
+                        "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${targetTag}"
 
                     echo "SOURCE IMAGE = ${sourceImage}"
                     echo "TARGET IMAGE = ${targetImage}"
@@ -254,6 +283,13 @@ pipeline {
             }
         }
 
+
+        /*
+         * ============================================================
+         * PROD - PROMOTE
+         * ============================================================
+         */
+
         stage('PROD - Promote Image') {
 
             when {
@@ -269,19 +305,20 @@ pipeline {
                     def sourceTag = params.DEV_IMAGE_TAG
 
                     if (!sourceTag?.trim()) {
+
                         error(
                             "DEV_IMAGE_TAG is required when promoting to PROD."
                         )
                     }
 
                     def sourceImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
+                        "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${sourceTag}"
 
                     def targetTag =
                         "PROD-${sourceTag.replaceFirst('^DEV-', '')}"
 
                     def targetImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
+                        "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${targetTag}"
 
                     echo "SOURCE IMAGE = ${sourceImage}"
                     echo "TARGET IMAGE = ${targetImage}"
@@ -319,6 +356,13 @@ pipeline {
             }
         }
 
+
+        /*
+         * ============================================================
+         * CREATE FRONTEND TASK DEFINITION
+         * ============================================================
+         */
+
         stage('Create Task Definition') {
 
             steps {
@@ -326,6 +370,7 @@ pipeline {
                 script {
 
                     if (!env.IMAGE_URI?.trim()) {
+
                         error("IMAGE_URI is empty.")
                     }
 
@@ -344,7 +389,7 @@ import json
 import os
 
 input_file = os.environ["TASK_DEFINITION_TEMPLATE"]
-output_file = "new-db-task-definition.json"
+output_file = "new-frontend-task-definition.json"
 
 environment = os.environ["ENVIRONMENT"]
 image_uri = os.environ["IMAGE_URI"]
@@ -352,29 +397,51 @@ image_uri = os.environ["IMAGE_URI"]
 with open(input_file, "r") as f:
     task_definition = json.load(f)
 
+# Set environment-specific task definition family
 task_definition["family"] = \
-    f"employee-managemet-{environment}-db"
+    f"employee-managemet-{environment}-frontend"
 
+# Find the FRONTEND container and update its image
 for container in task_definition["containerDefinitions"]:
 
-    if container["name"] == "db":
+    if container["name"] == "frontend":
+
         container["image"] = image_uri
         break
 
 else:
-    raise Exception("Container named 'db' was not found.")
 
+    raise Exception(
+        "Container named 'frontend' was not found."
+    )
+
+# Write the new task definition
 with open(output_file, "w") as f:
-    json.dump(task_definition, f, indent=2)
+
+    json.dump(
+        task_definition,
+        f,
+        indent=2
+    )
 
 PY
 
-                        echo "Generated task definition:"
-                        cat new-db-task-definition.json
+                        echo "======================================"
+                        echo "Generated FRONTEND task definition:"
+                        echo "======================================"
+
+                        cat new-frontend-task-definition.json
                     """
                 }
             }
         }
+
+
+        /*
+         * ============================================================
+         * REGISTER AND UPDATE FRONTEND ECS SERVICE
+         * ============================================================
+         */
 
         stage('Register and Update ECS Service') {
 
@@ -383,15 +450,19 @@ PY
                 script {
 
                     def revision = sh(
+
                         script: """
+
                             set -e
 
                             aws ecs register-task-definition \
-                                --cli-input-json file://new-db-task-definition.json \
+                                --cli-input-json file://new-frontend-task-definition.json \
                                 --region ${env.AWS_REGION} \
                                 --query 'taskDefinition.revision' \
                                 --output text
+
                         """,
+
                         returnStdout: true
                     ).trim()
 
@@ -413,19 +484,24 @@ PY
                         "employee-managemet-${environment}-cluster"
 
                     def service =
-                        "employee-managemet-${environment}-db-service"
+                        "employee-managemet-${environment}-frontend-service"
 
                     def taskFamily =
-                        "employee-managemet-${environment}-db"
+                        "employee-managemet-${environment}-frontend"
 
-                    echo "ENVIRONMENT = ${environment}"
-                    echo "CLUSTER = ${cluster}"
-                    echo "SERVICE = ${service}"
-                    echo "TASK FAMILY = ${taskFamily}"
+                    echo "======================================"
+                    echo "ENVIRONMENT  = ${environment}"
+                    echo "CLUSTER      = ${cluster}"
+                    echo "SERVICE      = ${service}"
+                    echo "TASK FAMILY  = ${taskFamily}"
                     echo "TASK REVISION = ${revision}"
+                    echo "======================================"
 
                     sh """
+
                         set -e
+
+                        echo "Updating ECS frontend service..."
 
                         aws ecs update-service \
                             --cluster ${cluster} \
@@ -434,15 +510,22 @@ PY
                             --force-new-deployment \
                             --region ${env.AWS_REGION}
 
+                        echo "Waiting for ECS service to become stable..."
+
                         aws ecs wait services-stable \
                             --cluster ${cluster} \
                             --services ${service} \
                             --region ${env.AWS_REGION}
+
                     """
 
-                    echo "ECS ${environment} deployment completed successfully."
+                    echo "======================================"
+                    echo "ECS ${environment} FRONTEND deployment"
+                    echo "completed successfully."
+                    echo "======================================"
                 }
             }
         }
     }
 }
+
