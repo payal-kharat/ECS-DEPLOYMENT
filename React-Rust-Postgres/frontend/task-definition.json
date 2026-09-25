@@ -20,13 +20,13 @@
       "systemControls": []
     }
   ],
-  "family": "employee-managemet-dev-frontend",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/employee-managemet-ecs-execution-role",
+  "family": "APP-4-dev-frontend",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/APP-4-ecs-execution-role",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
   ],
   "cpu": "256",
   "memory": "512"
+  
 }
-
