@@ -1,13 +1,13 @@
 {
   "containerDefinitions": [
     {
-      "name": "db",
-      "image": "postgres:latest",
+      "name": "backend",
+      "image": "python:3.10-alpine",
       "cpu": 0,
       "portMappings": [
         {
-          "containerPort": 5432,
-          "hostPort": 5432,
+          "containerPort": 8000,
+          "hostPort": 8000,
           "protocol": "tcp",
           "name": "mysql"
         }
@@ -15,16 +15,28 @@
       "essential": true,
       "environment": [
         {
-          "name": "POSTGRES_PASSWORD",
-          "value": "mysecretpassword"
+          "name": "ADDRESS",
+          "value": "0.0.0.0:8000"
         },
         {
-          "name": "PGDATA",
-          "value": "/var/lib/postgresql/data/pgdata"
+          "name": "RUST_LOG",
+          "value": "debug"
         },
         {
-          "name": "POSTGRES_DB",
+          "name": "PG_DBNAME",
           "value": "postgres"
+        },
+        {
+          "name": "PG_HOST",
+          "value": "app4-db"
+        },
+        {
+          "name": "PG_USER",
+          "value": "postgres"
+        },
+        {
+          "name": "PG_PASSWORD",
+          "value": "mysecretpassword"
         }
       ],
       "mountPoints": [],
@@ -32,12 +44,14 @@
       "systemControls": []
     }
   ],
-  "family": "employee-managemet-${ENV}-db",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/employee-managemet-ecs-execution-role",
+  "family": "APP-4-dev-backend",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/APP-4-ecs-execution-role",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
   ],
   "cpu": "256",
   "memory": "512"
+  
 }
+
