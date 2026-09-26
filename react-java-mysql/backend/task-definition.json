@@ -1,0 +1,56 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "backend",
+      "image": "python:3.10-alpine",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp",
+          "name": "backend"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "ADDRESS",
+          "value": "0.0.0.0:8000"
+        },
+        {
+          "name": "RUST_LOG",
+          "value": "debug"
+        },
+        {
+          "name": "PG_DBNAME",
+          "value": "postgres"
+        },
+        {
+          "name": "PG_HOST",
+          "value": "app4-db"
+        },
+        {
+          "name": "PG_USER",
+          "value": "postgres"
+        },
+        {
+          "name": "PG_PASSWORD",
+          "value": "mysecretpassword"
+        }
+      ],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "systemControls": []
+    }
+  ],
+  "family": "app-4-dev-backend",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/app-4-ecs-execution-role",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}
+
