@@ -27,10 +27,10 @@ pipeline {
 
         DB_REPOSITORY = 'app-3-db'
 
-        BUILD_CONTEXT = './React-Java-Mysql/db'
+        BUILD_CONTEXT = './react-java-mysql/db'
 
         TASK_DEFINITION_TEMPLATE =
-            './React-Java-Mysql/db/task-definition.json'
+            './react-java-mysql/db/task-definition.json'
     }
 
     stages {
