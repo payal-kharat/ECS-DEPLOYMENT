@@ -45,7 +45,7 @@
     }
   ],
   "family": "app-4-dev-backend",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/app-4-ecs-execution-role",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/app-3-ecs-execution-role",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
