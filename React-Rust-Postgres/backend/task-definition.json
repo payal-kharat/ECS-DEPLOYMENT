@@ -1,3 +1,4 @@
+
 {
   "containerDefinitions": [
     {
@@ -9,7 +10,7 @@
           "containerPort": 8000,
           "hostPort": 8000,
           "protocol": "tcp",
-          "name": "mysql"
+          "name": "backend"
         }
       ],
       "essential": true,
@@ -53,4 +54,3 @@
   "cpu": "256",
   "memory": "512"
 }
-
