@@ -36,13 +36,6 @@ pipeline {
     }
 
     stages {
-
-        /*
-         * ============================================================
-         * DEV - BUILD
-         * ============================================================
-         */
-
         stage('DEV - Build Image') {
 
             when {
@@ -92,14 +85,6 @@ pipeline {
                 }
             }
         }
-
-
-        /*
-         * ============================================================
-         * DEV - PUSH
-         * ============================================================
-         */
-
         stage('DEV - Push Image') {
 
             when {
@@ -136,13 +121,6 @@ pipeline {
                 }
             }
         }
-
-
-        /*
-         * ============================================================
-         * QA - PROMOTE
-         * ============================================================
-         */
 
         stage('QA - Promote Image') {
 
@@ -210,13 +188,6 @@ pipeline {
             }
         }
 
-
-        /*
-         * ============================================================
-         * UAT - PROMOTE
-         * ============================================================
-         */
-
         stage('UAT - Promote Image') {
 
             when {
@@ -282,13 +253,6 @@ pipeline {
                 }
             }
         }
-
-
-        /*
-         * ============================================================
-         * PROD - PROMOTE
-         * ============================================================
-         */
 
         stage('PROD - Promote Image') {
 
@@ -356,13 +320,6 @@ pipeline {
             }
         }
 
-
-        /*
-         * ============================================================
-         * CREATE FRONTEND TASK DEFINITION
-         * ============================================================
-         */
-
         stage('Create Task Definition') {
 
             steps {
@@ -399,7 +356,7 @@ with open(input_file, "r") as f:
 
 # Set environment-specific task definition family
 task_definition["family"] = \
-    f"employee-managemet-{environment}-frontend"
+    f"app-4-{environment}-frontend"
 
 # Find the FRONTEND container and update its image
 for container in task_definition["containerDefinitions"]:
@@ -435,14 +392,6 @@ PY
                 }
             }
         }
-
-
-        /*
-         * ============================================================
-         * REGISTER AND UPDATE FRONTEND ECS SERVICE
-         * ============================================================
-         */
-
         stage('Register and Update ECS Service') {
 
             steps {
@@ -528,4 +477,3 @@ PY
         }
     }
 }
-
