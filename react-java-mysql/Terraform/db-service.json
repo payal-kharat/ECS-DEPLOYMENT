@@ -1,0 +1,223 @@
+{
+    "serviceArn": "arn:aws:ecs:us-east-1:552940445807:service/app-4-dev-cluster/app-4-dev-db-service",
+    "serviceName": "app-4-dev-db-service",
+    "clusterArn": "arn:aws:ecs:us-east-1:552940445807:cluster/app-4-dev-cluster",
+    "loadBalancers": [],
+    "serviceRegistries": [],
+    "status": "ACTIVE",
+    "desiredCount": 1,
+    "runningCount": 1,
+    "pendingCount": 0,
+    "launchType": "FARGATE",
+    "platformVersion": "LATEST",
+    "platformFamily": "Linux",
+    "taskDefinition": "arn:aws:ecs:us-east-1:552940445807:task-definition/app-4-dev-db:3",
+    "deploymentConfiguration": {
+        "deploymentCircuitBreaker": {
+            "enable": false,
+            "rollback": false
+        },
+        "maximumPercent": 200,
+        "minimumHealthyPercent": 100,
+        "strategy": "ROLLING",
+        "bakeTimeInMinutes": 0
+    },
+    "deployments": [
+        {
+            "id": "ecs-svc/5022991883177933249",
+            "status": "PRIMARY",
+            "taskDefinition": "arn:aws:ecs:us-east-1:552940445807:task-definition/app-4-dev-db:3",
+            "desiredCount": 1,
+            "pendingCount": 0,
+            "runningCount": 1,
+            "failedTasks": 0,
+            "createdAt": "2026-09-26T03:53:26.916000+00:00",
+            "updatedAt": "2026-09-26T04:43:53.806000+00:00",
+            "launchType": "FARGATE",
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "networkConfiguration": {
+                "awsvpcConfiguration": {
+                    "subnets": [
+                        "subnet-0034bda580633f970",
+                        "subnet-0642a3fa899c6b146",
+                        "subnet-0b0af126460583eba",
+                        "subnet-0dd5d6a1cc7844d56",
+                        "subnet-0ab9f1adb21d08d4a",
+                        "subnet-08a15b0fc26f78b95"
+                    ],
+                    "securityGroups": [
+                        "sg-0a6dbd5b2400543e2"
+                    ],
+                    "assignPublicIp": "ENABLED"
+                }
+            },
+            "rolloutState": "COMPLETED",
+            "rolloutStateReason": "ECS deployment ecs-svc/5022991883177933249 completed.",
+            "serviceConnectConfiguration": {
+                "enabled": true,
+                "namespace": "arn:aws:servicediscovery:us-east-1:552940445807:namespace/ns-jerrpqcwb7hw2p2l",
+                "services": [
+                    {
+                        "portName": "mysql",
+                        "discoveryName": "app4-db",
+                        "clientAliases": [
+                            {
+                                "port": 5432,
+                                "dnsName": "app4-db"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "serviceConnectResources": [
+                {
+                    "discoveryName": "app4-db",
+                    "discoveryArn": "arn:aws:servicediscovery:us-east-1:552940445807:service/srv-6hehdulpeknedtqr"
+                }
+            ]
+        }
+    ],
+    "roleArn": "arn:aws:iam::552940445807:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
+    "events": [
+        {
+            "id": "db21f4eb-bb66-4be6-a448-95c50f17c67e",
+            "createdAt": "2026-09-26T03:56:11.958000+00:00",
+            "message": "(service app-4-dev-db-service) has reached a steady state."
+        },
+        {
+            "id": "7c9adc5a-0091-423f-a1ee-2a064d384e70",
+            "createdAt": "2026-09-26T03:56:11.957000+00:00",
+            "message": "(service app-4-dev-db-service) (deployment ecs-svc/5022991883177933249) deployment completed."
+        },
+        {
+            "id": "36c5aca1-285c-4888-8fde-6583a6079157",
+            "createdAt": "2026-09-26T03:54:11.375000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task c3088f4b1d934432b8c4bbe232a7ea5d)."
+        },
+        {
+            "id": "3d6bcf91-fe86-463f-98bf-9190f097cb5a",
+            "createdAt": "2026-09-26T03:53:14.709000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task 9719c4c4d4b34ba180edeac57adc823c)."
+        },
+        {
+            "id": "607cf07d-d849-47b3-b5ff-49eb4d04e510",
+            "createdAt": "2026-09-26T03:52:44.083000+00:00",
+            "message": "(service app-4-dev-db-service) has reached a steady state."
+        },
+        {
+            "id": "6f3e3ce1-40d9-4d64-af23-7f4bcc7cd9c3",
+            "createdAt": "2026-09-26T03:51:46.191000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task 0b02e0a0e8854c3ab5db5e0fc53bd304)."
+        },
+        {
+            "id": "eb72f0e6-9458-4183-94b5-459370c5e6e9",
+            "createdAt": "2026-09-26T03:50:35.766000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task ce160e33ddb745ae9551fb356c7ef346)."
+        },
+        {
+            "id": "ab4d3c38-c504-4b03-95fa-b0e8613ab7cf",
+            "createdAt": "2026-09-26T03:50:04.805000+00:00",
+            "message": "(service app-4-dev-db-service) has reached a steady state."
+        },
+        {
+            "id": "0faf25f3-8db5-4f33-b7cf-ca99f4c1395e",
+            "createdAt": "2026-09-26T03:48:58.267000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task 6e0e9c204e854438b0e501247ce9ff8d)."
+        },
+        {
+            "id": "e0835634-97ad-4526-851a-eb394c34564f",
+            "createdAt": "2026-09-26T03:48:26.320000+00:00",
+            "message": "(service app-4-dev-db-service) has reached a steady state."
+        },
+        {
+            "id": "70f518d9-b044-402a-811d-6d767c3f71b6",
+            "createdAt": "2026-09-26T03:47:30.515000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task 6a4cd0b8e6c14b85a4f5328999579bfe)."
+        },
+        {
+            "id": "763603b5-b44e-4c7a-b5d9-025f7422c8c5",
+            "createdAt": "2026-09-26T03:46:59.301000+00:00",
+            "message": "(service app-4-dev-db-service) has reached a steady state."
+        },
+        {
+            "id": "2d067622-f388-437d-9f9e-8bf8aad32699",
+            "createdAt": "2026-09-26T03:46:13.674000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task 16b3c8fa5de044bca0cdaeb07b89adad)."
+        },
+        {
+            "id": "995f02a9-e124-45ab-ac16-1d219bdefb99",
+            "createdAt": "2026-09-26T03:45:43.131000+00:00",
+            "message": "(service app-4-dev-db-service) has reached a steady state."
+        },
+        {
+            "id": "6c964bb4-12ec-4bfb-85cf-87bd195cd3cf",
+            "createdAt": "2026-09-26T03:44:47.412000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task e558a3f5c6b443baba56bcfadd73296c)."
+        },
+        {
+            "id": "1cbfa025-24b2-42ea-942d-3155d10120ce",
+            "createdAt": "2026-09-26T03:44:15.910000+00:00",
+            "message": "(service app-4-dev-db-service) has reached a steady state."
+        },
+        {
+            "id": "b2411208-97dc-4fbd-b40c-4126f6f58191",
+            "createdAt": "2026-09-26T03:43:27.120000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task 23c702a442a448469e613addc858a54a)."
+        },
+        {
+            "id": "f365b688-2c03-437d-85f2-66df08fd1ce9",
+            "createdAt": "2026-09-26T03:42:56.718000+00:00",
+            "message": "(service app-4-dev-db-service) has reached a steady state."
+        },
+        {
+            "id": "ab0a226f-bd2b-4adf-9fbc-e64353dc7d9c",
+            "createdAt": "2026-09-26T03:41:59.835000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task c607d2522e734516b44106f90bbc04e2)."
+        },
+        {
+            "id": "1081df43-b836-4e0c-a4be-726c36bfb23b",
+            "createdAt": "2026-09-26T03:41:29.643000+00:00",
+            "message": "(service app-4-dev-db-service) has reached a steady state."
+        },
+        {
+            "id": "7c04adf9-b76c-4b9c-80c4-a750be8e8e14",
+            "createdAt": "2026-09-26T03:41:29.642000+00:00",
+            "message": "(service app-4-dev-db-service) (deployment ecs-svc/2954211353438730970) deployment completed."
+        },
+        {
+            "id": "254fb5c6-15d3-4ea5-b180-cb2eb0e6dedb",
+            "createdAt": "2026-09-26T03:40:28.831000+00:00",
+            "message": "(service app-4-dev-db-service) has started 1 tasks: (task d07911d634994f458c4f3584f4e436d1)."
+        }
+    ],
+    "createdAt": "2026-09-26T03:39:38.192000+00:00",
+    "placementConstraints": [],
+    "placementStrategy": [],
+    "networkConfiguration": {
+        "awsvpcConfiguration": {
+            "subnets": [
+                "subnet-0034bda580633f970",
+                "subnet-0642a3fa899c6b146",
+                "subnet-0b0af126460583eba",
+                "subnet-0dd5d6a1cc7844d56",
+                "subnet-0ab9f1adb21d08d4a",
+                "subnet-08a15b0fc26f78b95"
+            ],
+            "securityGroups": [
+                "sg-0a6dbd5b2400543e2"
+            ],
+            "assignPublicIp": "ENABLED"
+        }
+    },
+    "healthCheckGracePeriodSeconds": 0,
+    "schedulingStrategy": "REPLICA",
+    "deploymentController": {
+        "type": "ECS"
+    },
+    "createdBy": "arn:aws:iam::552940445807:user/EKS",
+    "enableECSManagedTags": false,
+    "propagateTags": "NONE",
+    "enableExecuteCommand": false,
+    "availabilityZoneRebalancing": "ENABLED"
+}

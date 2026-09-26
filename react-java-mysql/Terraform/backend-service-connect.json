@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "namespace": "arn:aws:servicediscovery:us-east-1:552940445807:namespace/ns-jerrpqcwb7hw2p2l",
+  "services": [
+    {
+      "portName": "backend",
+      "discoveryName": "app4-backend",
+      "clientAliases": [
+        {
+          "port": 8000,
+          "dnsName": "app4-backend"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,589 @@
+{
+    "serviceArn": "arn:aws:ecs:us-east-1:552940445807:service/app-4-dev-cluster/app-4-dev-backend-service",
+    "serviceName": "app-4-dev-backend-service",
+    "clusterArn": "arn:aws:ecs:us-east-1:552940445807:cluster/app-4-dev-cluster",
+    "loadBalancers": [
+        {
+            "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c",
+            "containerName": "backend",
+            "containerPort": 8000
+        }
+    ],
+    "serviceRegistries": [],
+    "status": "ACTIVE",
+    "desiredCount": 1,
+    "runningCount": 0,
+    "pendingCount": 0,
+    "launchType": "FARGATE",
+    "platformVersion": "LATEST",
+    "platformFamily": "Linux",
+    "taskDefinition": "arn:aws:ecs:us-east-1:552940445807:task-definition/app-4-dev-backend:3",
+    "deploymentConfiguration": {
+        "deploymentCircuitBreaker": {
+            "enable": false,
+            "rollback": false
+        },
+        "maximumPercent": 200,
+        "minimumHealthyPercent": 100,
+        "strategy": "ROLLING",
+        "bakeTimeInMinutes": 0
+    },
+    "deployments": [
+        {
+            "id": "ecs-svc/9269777902683800758",
+            "status": "PRIMARY",
+            "taskDefinition": "arn:aws:ecs:us-east-1:552940445807:task-definition/app-4-dev-backend:3",
+            "desiredCount": 1,
+            "pendingCount": 0,
+            "runningCount": 0,
+            "failedTasks": 4,
+            "createdAt": "2026-09-26T04:11:23.150000+00:00",
+            "updatedAt": "2026-09-26T04:46:37.483000+00:00",
+            "launchType": "FARGATE",
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "networkConfiguration": {
+                "awsvpcConfiguration": {
+                    "subnets": [
+                        "subnet-0034bda580633f970",
+                        "subnet-0642a3fa899c6b146",
+                        "subnet-0b0af126460583eba",
+                        "subnet-0dd5d6a1cc7844d56",
+                        "subnet-0ab9f1adb21d08d4a",
+                        "subnet-08a15b0fc26f78b95"
+                    ],
+                    "securityGroups": [
+                        "sg-0a6dbd5b2400543e2"
+                    ],
+                    "assignPublicIp": "ENABLED"
+                }
+            },
+            "rolloutState": "IN_PROGRESS",
+            "rolloutStateReason": "ECS deployment ecs-svc/9269777902683800758 in progress.",
+            "serviceConnectConfiguration": {
+                "enabled": true,
+                "namespace": "arn:aws:servicediscovery:us-east-1:552940445807:namespace/ns-jerrpqcwb7hw2p2l",
+                "services": [
+                    {
+                        "portName": "backend",
+                        "discoveryName": "app4-backend",
+                        "clientAliases": [
+                            {
+                                "port": 8000,
+                                "dnsName": "app4-backend"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "serviceConnectResources": [
+                {
+                    "discoveryName": "app4-backend",
+                    "discoveryArn": "arn:aws:servicediscovery:us-east-1:552940445807:service/srv-4yrp2dyw6if4wa7y"
+                }
+            ]
+        }
+    ],
+    "roleArn": "arn:aws:iam::552940445807:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
+    "events": [
+        {
+            "id": "22e71904-5e68-46ff-81e8-dda9b0b338a7",
+            "createdAt": "2026-09-26T04:46:14.212000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9269777902683800758) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "a9f99ba3-3a24-49b6-af4e-2b780b30ad1e",
+            "createdAt": "2026-09-26T04:46:04.608000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "a7b52525-42b5-40c7-a4d6-c97ed1f68884",
+            "createdAt": "2026-09-26T04:45:26.949000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "b4b4bd94-c22a-4393-b5cf-c4633f28a31b",
+            "createdAt": "2026-09-26T04:45:08.144000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9269777902683800758) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "8e97d57c-7e40-4618-b49f-4b3e8b7a85fc",
+            "createdAt": "2026-09-26T04:44:58.337000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "e9d30d66-b8d2-4ceb-ab5e-66be78086e11",
+            "createdAt": "2026-09-26T04:44:49.339000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 7f1b842954c7488a8a2c6ef322e95fd9)."
+        },
+        {
+            "id": "b100e4a7-0aee-4047-9871-ec62398a3215",
+            "createdAt": "2026-09-26T04:44:19.337000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "95b9df23-fd14-475f-9b9c-e1588ed88133",
+            "createdAt": "2026-09-26T04:43:42.750000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 767c20d0c36a413d832624d7e4324d10)."
+        },
+        {
+            "id": "14d44694-2996-4938-b121-8bab9a6c9284",
+            "createdAt": "2026-09-26T04:39:10.298000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "dfa72350-9ca4-4ecf-ae36-019a45b7b392",
+            "createdAt": "2026-09-26T04:39:00.232000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "dcd5cab5-6b82-4533-805a-b333708b13bc",
+            "createdAt": "2026-09-26T04:38:40.132000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9269777902683800758) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "4623902a-a31f-473e-a6c1-58e1bd3262fc",
+            "createdAt": "2026-09-26T04:38:29.468000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "7035bdc1-3667-48fe-8cd1-4bf30c679602",
+            "createdAt": "2026-09-26T04:38:20.405000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "b9a9594a-bd6d-43ab-bb22-dedad15b446e",
+            "createdAt": "2026-09-26T04:37:49.657000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 692b88fc0a54429ebfa12c82fbe26b7d)."
+        },
+        {
+            "id": "94b39e66-3ed2-4807-804a-46db626c905e",
+            "createdAt": "2026-09-26T04:37:49.044000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "f2ed4e41-6155-45f4-945f-6cde41f74022",
+            "createdAt": "2026-09-26T04:37:08.219000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task a946e8e28b8945a7a4672bf0b83ae7fe)."
+        },
+        {
+            "id": "9eedbe85-0cfd-4cf1-99f9-1a26122e3c40",
+            "createdAt": "2026-09-26T04:32:31.589000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "4fab8185-4357-4712-b3d8-5219aa5b88cb",
+            "createdAt": "2026-09-26T04:32:31.484000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "bbb4596f-c943-4d0b-ba41-444e34938bb9",
+            "createdAt": "2026-09-26T04:32:31.476000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "514845c3-5788-4314-a123-cab209539f27",
+            "createdAt": "2026-09-26T04:32:00.201000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9269777902683800758) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "c11d1224-965f-44ff-9002-4e0904a544db",
+            "createdAt": "2026-09-26T04:32:00.197000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "3b968950-5b01-47ce-a0cd-720f5e21e266",
+            "createdAt": "2026-09-26T04:31:50.993000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "2bdb88d0-e3a5-4033-8114-fab3387df8a6",
+            "createdAt": "2026-09-26T04:31:49.798000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "ede3d852-0d58-411e-afec-3f1b1b5da362",
+            "createdAt": "2026-09-26T04:31:10.079000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 11b26498b2b747c7a052f15a0862326c)."
+        },
+        {
+            "id": "f8887f75-f543-402a-b3de-2e07919812ce",
+            "createdAt": "2026-09-26T04:31:09.472000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "be2a115d-acb9-490c-b207-609e797c2b78",
+            "createdAt": "2026-09-26T04:30:28.034000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 2d71c823ceab48cdadf56790cf9860b7)."
+        },
+        {
+            "id": "49021e91-6b89-407f-b27d-066d1be5ef7b",
+            "createdAt": "2026-09-26T04:25:51.237000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "9ee30879-2165-4f6d-a88f-05682d3b6e03",
+            "createdAt": "2026-09-26T04:25:51.136000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "78815d1d-b70a-45f5-89df-3d242cf3ac79",
+            "createdAt": "2026-09-26T04:25:10.326000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "b0edc8dc-1178-4dff-99e6-1542b0e71b91",
+            "createdAt": "2026-09-26T04:25:10.228000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9269777902683800758) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "4504526f-d5b0-4003-86e6-2c37a168b406",
+            "createdAt": "2026-09-26T04:25:10.222000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "10ad6db7-e5ab-4ba8-b8c5-cc4aafbe2a85",
+            "createdAt": "2026-09-26T04:25:10.168000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "69825791-1806-48ee-ac63-ab4a01d6f255",
+            "createdAt": "2026-09-26T04:24:30.607000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 91c0bb134c994586a56a6df07af5ecb2)."
+        },
+        {
+            "id": "e9170a1a-1547-4cf9-8668-035766e17f49",
+            "createdAt": "2026-09-26T04:24:29.670000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "7880a6b5-d399-4abc-abec-65732ac07409",
+            "createdAt": "2026-09-26T04:23:39.170000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task fca3c050e8ec40e9923ee1ff51811afe)."
+        },
+        {
+            "id": "5dc71e3f-5b66-44da-95eb-4fd438a38b37",
+            "createdAt": "2026-09-26T04:19:11.083000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "a47e2983-4021-489c-b785-0dc37fea49d6",
+            "createdAt": "2026-09-26T04:19:11.002000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "e6b3afdc-e4e1-48a9-bde2-bea4073ebba3",
+            "createdAt": "2026-09-26T04:19:10.996000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "5d47036f-9dc4-4b57-9317-75b53a3150a4",
+            "createdAt": "2026-09-26T04:18:30.817000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9269777902683800758) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "f1bc1ed6-824c-4aa4-976c-1cabdb899346",
+            "createdAt": "2026-09-26T04:18:30.812000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "8a2bc09d-fdb7-4f23-86e8-a48bdd43f603",
+            "createdAt": "2026-09-26T04:18:30.751000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "5335de99-a55a-4d46-ba04-c540fd9af0e8",
+            "createdAt": "2026-09-26T04:18:20.008000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "f84b5deb-bce2-4d09-ab0d-ba22500ab8b7",
+            "createdAt": "2026-09-26T04:17:49.348000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 7afdac62b64146f5b82e86288a696098)."
+        },
+        {
+            "id": "e2c3f82d-b415-4dde-be52-dede4e08c615",
+            "createdAt": "2026-09-26T04:17:40.032000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "294a6729-98a4-47c9-ab4c-0f3032876c49",
+            "createdAt": "2026-09-26T04:16:48.381000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 9f8cab9a4ac34b48ae2caceda3a13787)."
+        },
+        {
+            "id": "4909543e-a054-4294-845f-3471941427c0",
+            "createdAt": "2026-09-26T04:12:31.953000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "b984488a-c80d-4d06-b926-001d2c9918d5",
+            "createdAt": "2026-09-26T04:12:31.876000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "455c951c-202a-4d31-863f-aa93e45102fd",
+            "createdAt": "2026-09-26T04:12:31.869000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "28f6773a-9c75-4e1d-8662-3a97a38b85a5",
+            "createdAt": "2026-09-26T04:11:50.217000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "e4122649-9102-4a8c-8bce-815c0e2c8ba5",
+            "createdAt": "2026-09-26T04:11:18.541000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "ee3b8a11-30d8-4468-8162-c3ef25d4f131",
+            "createdAt": "2026-09-26T04:11:18.458000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "94cfa664-35eb-4e9e-9827-86dc24f9a3ec",
+            "createdAt": "2026-09-26T04:11:18.452000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "48e6e636-7782-4c7e-8d8d-d87351278f79",
+            "createdAt": "2026-09-26T04:11:09.258000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 2fe7acfd0c5b4cfb9c3b0a83ef212882)."
+        },
+        {
+            "id": "674d2616-fba9-4c71-8ddc-1579f0233dd4",
+            "createdAt": "2026-09-26T04:10:38.891000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "28845bf4-9a7e-4022-8729-d04b321f3748",
+            "createdAt": "2026-09-26T04:09:58.230000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task a990f37bfbbd47edbaeaa92d836c5fa2)."
+        },
+        {
+            "id": "264af976-d050-408e-b3c8-ce5deecb3156",
+            "createdAt": "2026-09-26T04:05:51.475000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "81b8b3c9-c418-48da-9355-87b8e9d6da17",
+            "createdAt": "2026-09-26T04:05:51.409000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "caa388cf-ff33-43d2-b57b-ec4636cc5262",
+            "createdAt": "2026-09-26T04:05:51.403000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "927c412e-8ec2-4d76-a000-897d18aee3c3",
+            "createdAt": "2026-09-26T04:05:10.252000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "e1ebc70a-af3f-4889-b253-dda309a41be8",
+            "createdAt": "2026-09-26T04:04:38.973000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "9d41bcd4-2550-422c-8d4e-89bb4f6367d1",
+            "createdAt": "2026-09-26T04:04:38.896000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "6d105906-0f67-4a5f-9533-8f4785d40acb",
+            "createdAt": "2026-09-26T04:04:38.890000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "e9b209b7-3bff-4832-ae29-e5cb8ceb68c7",
+            "createdAt": "2026-09-26T04:04:30.689000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 066bf602400040aab9b20d4e20ae9131)."
+        },
+        {
+            "id": "4ed7861f-989d-4b9e-ba5a-b97596c4268f",
+            "createdAt": "2026-09-26T04:03:58.815000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "212c8d13-fbda-4917-a467-4f1121e14e8c",
+            "createdAt": "2026-09-26T04:03:08.093000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task b30a582ef6e440839a1fd26cabdad550)."
+        },
+        {
+            "id": "84793c1f-ec70-4cb3-aae6-b85206dabaec",
+            "createdAt": "2026-09-26T03:58:40.952000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "88ad7cc7-010c-4bfe-8161-790b3a3ce235",
+            "createdAt": "2026-09-26T03:58:40.890000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "892a21d5-442d-4165-918a-21fd811920a5",
+            "createdAt": "2026-09-26T03:58:40.884000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "26d959c2-b8ee-4241-9027-347fdac6a2b9",
+            "createdAt": "2026-09-26T03:58:01.158000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "544a7992-4620-4441-b60c-9cd58ce97ad8",
+            "createdAt": "2026-09-26T03:57:49.305000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "3df22918-18d7-4c31-a776-42141a9a386f",
+            "createdAt": "2026-09-26T03:57:49.244000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "ec8b6668-f8b9-4fe1-9ed4-6148a7afd9b6",
+            "createdAt": "2026-09-26T03:57:49.238000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "59e77596-f48e-487c-8588-1b208e4a3157",
+            "createdAt": "2026-09-26T03:57:30.640000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task e69ae2c178c04610acfa7fb9a552601c)."
+        },
+        {
+            "id": "2c911803-4f34-45c1-ad4c-5af5c63096f1",
+            "createdAt": "2026-09-26T03:57:09.905000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "0b82739e-13a0-46a0-a371-35e7cbb862fc",
+            "createdAt": "2026-09-26T03:56:28.940000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task eabe9cb59d634ac48cff3fb7bea74c96)."
+        },
+        {
+            "id": "8a564b88-4870-4acd-96ff-ba354f93652d",
+            "createdAt": "2026-09-26T03:52:01.173000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "0cef34bb-a21f-488f-bc72-5153da4b2878",
+            "createdAt": "2026-09-26T03:52:01.167000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "ee81453e-c147-48ea-a910-6b53dd434175",
+            "createdAt": "2026-09-26T03:51:31.183000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "1f91f5e6-ae2d-4fdb-b99f-922fecdee86b",
+            "createdAt": "2026-09-26T03:51:10.096000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "1366c331-f29a-427b-a4e5-fd3e3649c2ab",
+            "createdAt": "2026-09-26T03:51:10.036000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "ad2dd4ef-8e7e-44f6-b094-fe8bdf47d0aa",
+            "createdAt": "2026-09-26T03:51:10.030000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "27ae99f6-8769-46f4-a608-78f8adbb00ca",
+            "createdAt": "2026-09-26T03:50:50.133000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 965428287bc14e0baa7062322fce0089)."
+        },
+        {
+            "id": "76457138-432a-477f-932d-ea768e66021f",
+            "createdAt": "2026-09-26T03:50:29.132000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "ce556d67-3b32-42ae-9257-d1100a2c10bd",
+            "createdAt": "2026-09-26T03:49:27.616000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 79bcfd758363431fa4b6dc27f1146987)."
+        },
+        {
+            "id": "71ef9bda-227e-43ef-bd18-28756b0fc0b7",
+            "createdAt": "2026-09-26T03:45:20.992000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "c2e89b9d-9a0c-4999-8174-0de0366d83c6",
+            "createdAt": "2026-09-26T03:45:20.954000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "e760f18a-632d-4305-a576-7801cb63886b",
+            "createdAt": "2026-09-26T03:45:20.947000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "6f8da5a5-7fac-44fc-a38e-20bfbacc7154",
+            "createdAt": "2026-09-26T03:44:40.960000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "2d4645c8-f946-4d0c-a009-98257f43d24b",
+            "createdAt": "2026-09-26T03:44:09.009000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "875d4c1e-5457-4d05-b9f5-305ce4f193ed",
+            "createdAt": "2026-09-26T03:44:08.964000+00:00",
+            "message": "(service app-4-dev-backend-service, taskSet ecs-svc/9705506682967836081) has begun draining connections on 1 tasks."
+        },
+        {
+            "id": "08436b0d-964c-44e8-8baa-5ecc73906409",
+            "createdAt": "2026-09-26T03:44:08.958000+00:00",
+            "message": "(service app-4-dev-backend-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "33f91de6-6fa2-4f1f-8c61-5f8f9a2a737d",
+            "createdAt": "2026-09-26T03:44:00.395000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task cd40e2cfd5b54516ae9e2aeef654179e)."
+        },
+        {
+            "id": "9bcacd47-26f6-476d-903e-163391c9088e",
+            "createdAt": "2026-09-26T03:43:27.893000+00:00",
+            "message": "(service app-4-dev-backend-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:552940445807:targetgroup/app-4-dev-b-tg/b79e6ccdf8b1b86c)"
+        },
+        {
+            "id": "d8dba7c6-8f7d-4f8a-8419-87f2bae928e8",
+            "createdAt": "2026-09-26T03:42:48.645000+00:00",
+            "message": "(service app-4-dev-backend-service) has started 1 tasks: (task 39bbb80c3a7a446b88bff2d90803a31c)."
+        }
+    ],
+    "createdAt": "2026-09-26T03:42:04.076000+00:00",
+    "placementConstraints": [],
+    "placementStrategy": [],
+    "networkConfiguration": {
+        "awsvpcConfiguration": {
+            "subnets": [
+                "subnet-0034bda580633f970",
+                "subnet-0642a3fa899c6b146",
+                "subnet-0b0af126460583eba",
+                "subnet-0dd5d6a1cc7844d56",
+                "subnet-0ab9f1adb21d08d4a",
+                "subnet-08a15b0fc26f78b95"
+            ],
+            "securityGroups": [
+                "sg-0a6dbd5b2400543e2"
+            ],
+            "assignPublicIp": "ENABLED"
+        }
+    },
+    "healthCheckGracePeriodSeconds": 0,
+    "schedulingStrategy": "REPLICA",
+    "deploymentController": {
+        "type": "ECS"
+    },
+    "createdBy": "arn:aws:iam::552940445807:user/EKS",
+    "enableECSManagedTags": false,
+    "propagateTags": "NONE",
+    "enableExecuteCommand": false,
+    "availabilityZoneRebalancing": "ENABLED"
+}

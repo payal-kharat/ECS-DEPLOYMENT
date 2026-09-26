@@ -1,0 +1,39 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "db",
+      "image": "mariadb:10-focal",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "containerPort": 5432,
+          "hostPort": 5432,
+          "protocol": "tcp",
+          "name": "mysql"
+        }
+      ],
+      "essential": true,
+      "environment": [
+  {
+    "name": "MYSQL_DATABASE",
+    "value": "example"
+  },
+  {
+    "name": "MYSQL_ROOT_PASSWORD",
+    "value": "rootpassword"
+  }
+],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "systemControls": []
+    }
+  ],
+  "family": "app-4-dev-db",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/app-4-ecs-execution-role",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}

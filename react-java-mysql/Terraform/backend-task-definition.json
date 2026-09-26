@@ -1,0 +1,84 @@
+{
+    "taskDefinition": {
+        "taskDefinitionArn": "arn:aws:ecs:us-east-1:552940445807:task-definition/app-4-dev-backend:4",
+        "containerDefinitions": [
+            {
+                "name": "backend",
+                "image": "552940445807.dkr.ecr.us-east-1.amazonaws.com/app-4-db:DEV-f04b4e6-7",
+                "cpu": 0,
+                "portMappings": [
+                    {
+                        "containerPort": 8000,
+                        "hostPort": 8000,
+                        "protocol": "tcp",
+                        "name": "backend"
+                    }
+                ],
+                "essential": true,
+                "environment": [
+                    {
+                        "name": "PG_PASSWORD",
+                        "value": "mysecretpassword"
+                    },
+                    {
+                        "name": "RUST_LOG",
+                        "value": "debug"
+                    },
+                    {
+                        "name": "PG_USER",
+                        "value": "postgres"
+                    },
+                    {
+                        "name": "ADDRESS",
+                        "value": "0.0.0.0:8000"
+                    },
+                    {
+                        "name": "PG_DBNAME",
+                        "value": "postgres"
+                    },
+                    {
+                        "name": "PG_HOST",
+                        "value": "app4-db"
+                    }
+                ],
+                "mountPoints": [],
+                "volumesFrom": [],
+                "systemControls": []
+            }
+        ],
+        "family": "app-4-dev-backend",
+        "executionRoleArn": "arn:aws:iam::552940445807:role/app-4-ecs-execution-role",
+        "networkMode": "awsvpc",
+        "revision": 4,
+        "volumes": [],
+        "status": "ACTIVE",
+        "requiresAttributes": [
+            {
+                "name": "com.amazonaws.ecs.capability.ecr-auth"
+            },
+            {
+                "name": "ecs.capability.execution-role-ecr-pull"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+            },
+            {
+                "name": "ecs.capability.task-eni"
+            }
+        ],
+        "placementConstraints": [],
+        "compatibilities": [
+            "EC2",
+            "MANAGED_INSTANCES",
+            "FARGATE"
+        ],
+        "requiresCompatibilities": [
+            "FARGATE"
+        ],
+        "cpu": "256",
+        "memory": "512",
+        "registeredAt": "2026-09-26T04:47:33.323000+00:00",
+        "registeredBy": "arn:aws:sts::552940445807:assumed-role/JenkinsRole/i-08d14fbf4ea4157ba"
+    },
+    "tags": []
+}

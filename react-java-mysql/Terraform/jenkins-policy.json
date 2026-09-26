@@ -1,0 +1,30 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:GetAuthorizationToken",
+        "ecr:DescribeRepositories"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:DescribeImages",
+        "ecr:InitiateLayerUpload",
+        "ecr:ListImages",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": [
+        "arn:aws:ecr:us-east-1:552940445807:repository/jenkins-ecs-deployment-frontend",
+        "arn:aws:ecr:us-east-1:552940445807:repository/jenkins-ecs-deployment-backend",
+        "arn:aws:ecr:us-east-1:552940445807:repository/jenkins-ecs-deployment-db"
+      ]
+    }
+  ]
+}
