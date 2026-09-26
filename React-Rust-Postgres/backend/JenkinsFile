@@ -14,7 +14,7 @@ pipeline {
         string(
             name: 'DEV_IMAGE_TAG',
             defaultValue: '',
-            description: 'Enter the DEV image tag to promote, e.g. DEV-def5678'
+            description: 'Enter the DEV image tag to promote, e.g. DEV-def5678-25'
         )
     }
 
@@ -37,6 +37,12 @@ pipeline {
 
     stages {
 
+        /*
+         * ============================================================
+         * DEV - BUILD IMAGE
+         * ============================================================
+         */
+
         stage('DEV - Build Image') {
 
             when {
@@ -54,21 +60,32 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
+                    /*
+                     * Unique immutable tag:
+                     *
+                     * DEV-<commit>-<jenkins-build-number>
+                     *
+                     * Example:
+                     * DEV-aad9cbf-25
+                     */
+
                     def imageTag =
-                        "DEV-${commitId}"
+                        "DEV-${commitId}-${env.BUILD_NUMBER}"
 
                     def imageUri =
                         "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${imageTag}"
 
                     echo "======================================"
-                    echo "ENVIRONMENT = dev"
-                    echo "IMAGE TAG   = ${imageTag}"
-                    echo "IMAGE URI   = ${imageUri}"
+                    echo "ENVIRONMENT  = dev"
+                    echo "COMMIT ID    = ${commitId}"
+                    echo "BUILD NUMBER = ${env.BUILD_NUMBER}"
+                    echo "IMAGE TAG    = ${imageTag}"
+                    echo "IMAGE URI    = ${imageUri}"
                     echo "======================================"
 
                     env.IMAGE_URI = imageUri
 
-                    echo "Building DB Docker image..."
+                    echo "Building backend Docker image..."
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
@@ -86,6 +103,13 @@ pipeline {
                 }
             }
         }
+
+
+        /*
+         * ============================================================
+         * DEV - PUSH IMAGE
+         * ============================================================
+         */
 
         stage('DEV - Push Image') {
 
@@ -107,7 +131,7 @@ pipeline {
                         )
                     }
 
-                    echo "Pushing DB Docker image..."
+                    echo "Pushing backend Docker image..."
                     echo "IMAGE URI = ${env.IMAGE_URI}"
 
                     docker.withRegistry(
@@ -124,6 +148,13 @@ pipeline {
             }
         }
 
+
+        /*
+         * ============================================================
+         * QA - PROMOTE IMAGE
+         * ============================================================
+         */
+
         stage('QA - Promote Image') {
 
             when {
@@ -136,13 +167,14 @@ pipeline {
 
                 script {
 
-                    def sourceTag = params.DEV_IMAGE_TAG
+                    if (!params.DEV_IMAGE_TAG?.trim()) {
 
-                    if (!sourceTag?.trim()) {
                         error(
-                            "DEV_IMAGE_TAG is required when promoting to QA."
+                            "DEV_IMAGE_TAG is required for QA promotion."
                         )
                     }
+
+                    def sourceTag = params.DEV_IMAGE_TAG
 
                     def sourceImage =
                         "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
@@ -189,6 +221,13 @@ pipeline {
             }
         }
 
+
+        /*
+         * ============================================================
+         * UAT - PROMOTE IMAGE
+         * ============================================================
+         */
+
         stage('UAT - Promote Image') {
 
             when {
@@ -201,13 +240,14 @@ pipeline {
 
                 script {
 
-                    def sourceTag = params.DEV_IMAGE_TAG
+                    if (!params.DEV_IMAGE_TAG?.trim()) {
 
-                    if (!sourceTag?.trim()) {
                         error(
-                            "DEV_IMAGE_TAG is required when promoting to UAT."
+                            "DEV_IMAGE_TAG is required for UAT promotion."
                         )
                     }
+
+                    def sourceTag = params.DEV_IMAGE_TAG
 
                     def sourceImage =
                         "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
@@ -254,6 +294,13 @@ pipeline {
             }
         }
 
+
+        /*
+         * ============================================================
+         * PROD - PROMOTE IMAGE
+         * ============================================================
+         */
+
         stage('PROD - Promote Image') {
 
             when {
@@ -266,13 +313,14 @@ pipeline {
 
                 script {
 
-                    def sourceTag = params.DEV_IMAGE_TAG
+                    if (!params.DEV_IMAGE_TAG?.trim()) {
 
-                    if (!sourceTag?.trim()) {
                         error(
-                            "DEV_IMAGE_TAG is required when promoting to PROD."
+                            "DEV_IMAGE_TAG is required for PROD promotion."
                         )
                     }
+
+                    def sourceTag = params.DEV_IMAGE_TAG
 
                     def sourceImage =
                         "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
@@ -319,6 +367,13 @@ pipeline {
             }
         }
 
+
+        /*
+         * ============================================================
+         * CREATE ECS TASK DEFINITION
+         * ============================================================
+         */
+
         stage('Create Task Definition') {
 
             steps {
@@ -326,6 +381,7 @@ pipeline {
                 script {
 
                     if (!env.IMAGE_URI?.trim()) {
+
                         error("IMAGE_URI is empty.")
                     }
 
@@ -344,7 +400,7 @@ import json
 import os
 
 input_file = os.environ["TASK_DEFINITION_TEMPLATE"]
-output_file = "new-db-task-definition.json"
+output_file = "new-backend-task-definition.json"
 
 environment = os.environ["ENVIRONMENT"]
 image_uri = os.environ["IMAGE_URI"]
@@ -352,17 +408,16 @@ image_uri = os.environ["IMAGE_URI"]
 with open(input_file, "r") as f:
     task_definition = json.load(f)
 
-task_definition["family"] = \
-    f"app-4-{environment}-db"
+task_definition["family"] = f"app-4-{environment}-backend"
 
 for container in task_definition["containerDefinitions"]:
 
-    if container["name"] == "db":
+    if container["name"] == "backend":
         container["image"] = image_uri
         break
 
 else:
-    raise Exception("Container named 'db' was not found.")
+    raise Exception("Container named 'backend' was not found.")
 
 with open(output_file, "w") as f:
     json.dump(task_definition, f, indent=2)
@@ -370,11 +425,18 @@ with open(output_file, "w") as f:
 PY
 
                         echo "Generated task definition:"
-                        cat new-db-task-definition.json
+                        cat new-backend-task-definition.json
                     """
                 }
             }
         }
+
+
+        /*
+         * ============================================================
+         * REGISTER TASK DEFINITION + UPDATE ECS SERVICE
+         * ============================================================
+         */
 
         stage('Register and Update ECS Service') {
 
@@ -387,7 +449,7 @@ PY
                             set -e
 
                             aws ecs register-task-definition \
-                                --cli-input-json file://new-db-task-definition.json \
+                                --cli-input-json file://new-backend-task-definition.json \
                                 --region ${env.AWS_REGION} \
                                 --query 'taskDefinition.revision' \
                                 --output text
@@ -413,10 +475,10 @@ PY
                         "app-4-${environment}-cluster"
 
                     def service =
-                        "app-4-${environment}-db-service"
+                        "app-4-${environment}-backend-service"
 
                     def taskFamily =
-                        "app-4-${environment}-db"
+                        "app-4-${environment}-backend"
 
                     echo "ENVIRONMENT = ${environment}"
                     echo "CLUSTER = ${cluster}"
@@ -446,3 +508,4 @@ PY
         }
     }
 }
+
