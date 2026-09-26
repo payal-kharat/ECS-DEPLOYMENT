@@ -1,3 +1,4 @@
+
 {
   "containerDefinitions": [
     {
@@ -35,7 +36,6 @@
   "family": "app-4-dev-db",
   "executionRoleArn": "arn:aws:iam::552940445807:role/app-4-ecs-execution-role",
   "networkMode": "awsvpc",
-  
   "requiresCompatibilities": [
     "FARGATE"
   ],
