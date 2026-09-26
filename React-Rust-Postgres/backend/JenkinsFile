@@ -26,7 +26,7 @@ pipeline {
         ECR_REGISTRY =
             "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-        DB_REPOSITORY = 'app-4-backend'
+        DB_REPOSITORY = 'app-4-db'
 
         BUILD_CONTEXT =
             './React-Rust-Postgres/backend'
@@ -353,7 +353,7 @@ with open(input_file, "r") as f:
     task_definition = json.load(f)
 
 task_definition["family"] = \
-    f"employee-managemet-{environment}-db"
+    f"app-4-{environment}-db"
 
 for container in task_definition["containerDefinitions"]:
 
@@ -410,13 +410,13 @@ PY
                         params.ENVIRONMENT
 
                     def cluster =
-                        "employee-managemet-${environment}-cluster"
+                        "app-4-${environment}-cluster"
 
                     def service =
-                        "employee-managemet-${environment}-db-service"
+                        "app-4-${environment}-db-service"
 
                     def taskFamily =
-                        "employee-managemet-${environment}-db"
+                        "app-4-${environment}-db"
 
                     echo "ENVIRONMENT = ${environment}"
                     echo "CLUSTER = ${cluster}"
