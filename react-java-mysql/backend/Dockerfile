@@ -1,5 +1,4 @@
-FROM --platform=$BUILDPLATFORM docker.io/library/maven:3.8.5-eclipse-temurin-17 AS builder
-
+FROM docker.io/library/maven:3.8.5-eclipse-temurin-17 AS builder
 WORKDIR /workdir/server
 
 COPY pom.xml .
