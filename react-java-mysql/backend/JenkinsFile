@@ -29,10 +29,10 @@ pipeline {
         DB_REPOSITORY = 'app-4-db'
 
         BUILD_CONTEXT =
-            './React-Rust-Postgres/backend'
+            './react-java-mysql/backend'
 
         TASK_DEFINITION_TEMPLATE =
-            './React-Rust-Postgres/backend/task-definition.json'
+            './react-java-mysql/backend/task-definition.json'
     }
 
     stages {
@@ -408,7 +408,7 @@ image_uri = os.environ["IMAGE_URI"]
 with open(input_file, "r") as f:
     task_definition = json.load(f)
 
-task_definition["family"] = f"app-4-{environment}-backend"
+task_definition["family"] = f"app-3-{environment}-backend"
 
 for container in task_definition["containerDefinitions"]:
 
@@ -472,13 +472,13 @@ PY
                         params.ENVIRONMENT
 
                     def cluster =
-                        "app-4-${environment}-cluster"
+                        "app-3-${environment}-cluster"
 
                     def service =
-                        "app-4-${environment}-backend-service"
+                        "app-3-${environment}-backend-service"
 
                     def taskFamily =
-                        "app-4-${environment}-backend"
+                        "app-3-${environment}-backend"
 
                     echo "ENVIRONMENT = ${environment}"
                     echo "CLUSTER = ${cluster}"
