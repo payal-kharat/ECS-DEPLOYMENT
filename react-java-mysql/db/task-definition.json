@@ -1,13 +1,14 @@
+
 {
   "containerDefinitions": [
     {
       "name": "db",
-      "image": "mariadb:10-focal",
+      "image": "mysql:8.0",
       "cpu": 0,
       "portMappings": [
         {
-          "containerPort": 5432,
-          "hostPort": 5432,
+          "containerPort": 3306,
+          "hostPort": 3306,
           "protocol": "tcp",
           "name": "mysql"
         }
@@ -28,8 +29,8 @@
       "systemControls": []
     }
   ],
-  "family": "app-4-dev-db",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/app-4-ecs-execution-role",
+  "family": "app-3-dev-db",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/app-3-ecs-execution-role",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
