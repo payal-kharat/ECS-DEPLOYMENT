@@ -26,7 +26,7 @@ pipeline {
         ECR_REGISTRY =
             "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-        DB_REPOSITORY = 'app-3-db'
+         BACKEND_REPOSITORY = 'app-3-db'
 
         BUILD_CONTEXT =
             './react-java-mysql/backend'
@@ -73,7 +73,7 @@ pipeline {
                         "DEV-${commitId}-${env.BUILD_NUMBER}"
 
                     def imageUri =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${imageTag}"
+                        "${env.ECR_REGISTRY}/${env.BACKEND_REPOSITORY}:${imageTag}"
 
                     echo "======================================"
                     echo "ENVIRONMENT  = dev"
@@ -177,13 +177,13 @@ pipeline {
                     def sourceTag = params.DEV_IMAGE_TAG
 
                     def sourceImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
+                        "${env.ECR_REGISTRY}/${env.BACKEND_REPOSITORY}:${sourceTag}"
 
                     def targetTag =
                         "QA-${sourceTag.replaceFirst('^DEV-', '')}"
 
                     def targetImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
+                        "${env.ECR_REGISTRY}/${env.BACKEND_REPOSITORY}:${targetTag}"
 
                     echo "SOURCE IMAGE = ${sourceImage}"
                     echo "TARGET IMAGE = ${targetImage}"
@@ -250,13 +250,13 @@ pipeline {
                     def sourceTag = params.DEV_IMAGE_TAG
 
                     def sourceImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
+                        "${env.ECR_REGISTRY}/${env.BACKEND_REPOSITORY}:${sourceTag}"
 
                     def targetTag =
                         "UAT-${sourceTag.replaceFirst('^DEV-', '')}"
 
                     def targetImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
+                        "${env.ECR_REGISTRY}/${env.BACKEND_REPOSITORY}:${targetTag}"
 
                     echo "SOURCE IMAGE = ${sourceImage}"
                     echo "TARGET IMAGE = ${targetImage}"
@@ -323,13 +323,13 @@ pipeline {
                     def sourceTag = params.DEV_IMAGE_TAG
 
                     def sourceImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
+                        "${env.ECR_REGISTRY}/${env.BACKEND_REPOSITORY}:${sourceTag}"
 
                     def targetTag =
                         "PROD-${sourceTag.replaceFirst('^DEV-', '')}"
 
                     def targetImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
+                        "${env.ECR_REGISTRY}/${env.BACKEND_REPOSITORY}:${targetTag}"
 
                     echo "SOURCE IMAGE = ${sourceImage}"
                     echo "TARGET IMAGE = ${targetImage}"
