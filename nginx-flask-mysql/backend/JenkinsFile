@@ -73,7 +73,7 @@ pipeline {
                         "DEV-${commitId}-${env.BUILD_NUMBER}"
 
                     def imageUri =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${imageTag}"
+                        "${env.ECR_REGISTRY}/${env.BACKEND_REPOSITORY}:${imageTag}"
 
                     echo "======================================"
                     echo "ENVIRONMENT  = dev"
