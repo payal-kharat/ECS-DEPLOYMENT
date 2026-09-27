@@ -19,7 +19,7 @@
     "value": "app2-db"
   },
   {
-    "name": "MYSQL_DATABASE",
+    "name": "DB_DATABASE",
     "value": "example"
   },
   {
