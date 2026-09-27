@@ -1,7 +1,13 @@
-FROM docker.io/library/nginx:alpine
+FROM nginx:1.13-alpine
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN apk add --no-cache gettext
+
+COPY conf /etc/nginx/conf.d/default.conf.template
+
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
