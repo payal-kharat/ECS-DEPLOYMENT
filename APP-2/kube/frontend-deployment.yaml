@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: app-2
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: app2-frontend
+
+  template:
+    metadata:
+      labels:
+        app: app2-frontend
+
+    spec:
+      containers:
+        - name: app2-frontend
+          image: docker.io/payalkharat/kubernetes-ingress:app2-frontend-v1
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 80
+
+          

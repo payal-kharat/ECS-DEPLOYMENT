@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app2-db-config
+  namespace: app-2
+
+data:
+  MYSQL_DATABASE: example
+  MYSQL_HOST: app2-db
+  MYSQL_PORT: "3306"
+
+

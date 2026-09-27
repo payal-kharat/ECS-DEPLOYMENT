@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-backend
+  namespace: app-2
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: app2-backend
+
+  template:
+    metadata:
+      labels:
+        app: app2-backend
+
+    spec:
+      containers:
+        - name: backend
+          image: docker.io/payalkharat/kubernetes-ingress:app2-backend
+
+          ports:
+            - containerPort: 8000
+
+          env:
+            - name: MYSQL_HOST
+              value: app2-db
+
+            - name: MYSQL_DATABASE
+              value: example
+
+            - name: MYSQL_USER
+              value: root
+
+          volumeMounts:
+            - name: db-password
+              mountPath: /run/secrets/db-password
+              subPath: db-password
+              readOnly: true
+
+      volumes:
+        - name: db-password
+          secret:
+            secretName: app2-db-secret
+            items:
+              - key: MYSQL_ROOT_PASSWORD
+                path: db-password
