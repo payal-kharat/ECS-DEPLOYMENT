@@ -27,7 +27,7 @@
     "value": "root"
   },
  {
-    "name": "MYSQL_PASSWORD",
+    "name": "DB_PASSWORD",
     "value": "rootpassword"
  }
 
