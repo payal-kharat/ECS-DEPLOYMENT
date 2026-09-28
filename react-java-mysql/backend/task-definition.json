@@ -14,37 +14,25 @@
       ],
       "essential": true,
       "environment": [
-        {
-          "name": "ADDRESS",
-          "value": "0.0.0.0:8000"
-        },
-        {
-          "name": "RUST_LOG",
-          "value": "debug"
-        },
-        {
-          "name": "PG_DBNAME",
-          "value": "postgres"
-        },
-        {
-          "name": "PG_HOST",
-          "value": "app4-db"
-        },
-        {
-          "name": "PG_USER",
-          "value": "postgres"
-        },
-        {
-          "name": "PG_PASSWORD",
-          "value": "mysecretpassword"
-        }
-      ],
+  {
+    "name": "MYSQL_DATABASE",
+    "value": "example"
+  },
+  {
+    "name": "MYSQL_HOST",
+    "value": "app3-db"
+  },
+  {
+    "name": "MYSQL_USER",
+    "value": "root"
+  }
+],
       "mountPoints": [],
       "volumesFrom": [],
       "systemControls": []
     }
   ],
-  "family": "app-4-dev-backend",
+  "family": "app-3-dev-backend",
   "executionRoleArn": "arn:aws:iam::552940445807:role/app-3-ecs-execution-role",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
