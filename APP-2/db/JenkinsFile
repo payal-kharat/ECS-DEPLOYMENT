@@ -108,7 +108,7 @@ pipeline {
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
-                        "ecr:${env.AWS_REGION}:aws-ecr-credentials"
+                        "ecr:${env.AWS_REGION}:AWS"
                     ) {
 
                         docker.image(env.IMAGE_URI).push()
