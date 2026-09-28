@@ -16,6 +16,16 @@
       "environment": [],
       "mountPoints": [],
       "volumesFrom": [],
+       "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/app-2-dev-frontend",
+          "awslogs-create-group": "true",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        },
+ "secretOptions": []
+      },
       "systemControls": []
     }
   ],
