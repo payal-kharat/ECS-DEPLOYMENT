@@ -1,18 +1,17 @@
-FROM python:3.10-alpine
-
+# syntax=docker/dockerfile:1.4
+FROM golang:1.18-alpine AS builder
 WORKDIR /code
 
-COPY requirements.txt /code
+ENV CGO_ENABLED 0
+ENV GOPATH /go
+ENV GOCACHE /go-build
 
-RUN pip3 install -r requirements.txt
+COPY go.mod go.sum ./
+RUN  go mod download
 
 COPY . .
 
-ENV FLASK_APP hello.py
-ENV FLASK_ENV development
-ENV FLASK_RUN_PORT 8000
-ENV FLASK_RUN_HOST 0.0.0.0
+RUN go build -o bin/backend main.go
 
-EXPOSE 8000
+CMD ["/code/bin/backend"]
 
-CMD ["flask", "run"]
