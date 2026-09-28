@@ -37,7 +37,7 @@
        "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/app-1-dev-backend",
+          "awslogs-group": "/ecs/app-1-dev-db",
           "awslogs-create-group": "true",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
