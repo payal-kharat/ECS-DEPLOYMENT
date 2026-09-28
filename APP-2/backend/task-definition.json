@@ -12,36 +12,34 @@
           "name": "backend"
         }
       ],
-     "logConfiguration": {
-  "logDriver": "awslogs",
-  "options": {
-    "awslogs-create-group": "true",
-    "awslogs-group": "/ecs/app-2-dev-db",
-    "awslogs-region": "us-east-1",
-    "awslogs-stream-prefix": "ecs"
-  }
-     }
-
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/app-2-dev-backend",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
       "essential": true,
-       "environment": [
-  {
-    "name": "MYSQL_HOST",
-    "value": "app2-db"
-  },
-  {
-    "name": "DB_DATABASE",
-    "value": "example"
-  },
-  {
-    "name": "MYSQL_USER",
-    "value": "root"
-  },
- {
-    "name": "MYSQL_PASSWORD",
-    "value": "rootpassword"
- }
-
-],
+      "environment": [
+        {
+          "name": "MYSQL_HOST",
+          "value": "app2-db"
+        },
+        {
+          "name": "DB_DATABASE",
+          "value": "example"
+        },
+        {
+          "name": "MYSQL_USER",
+          "value": "root"
+        },
+        {
+          "name": "MYSQL_PASSWORD",
+          "value": "rootpassword"
+        }
+      ],
       "mountPoints": [],
       "volumesFrom": [],
       "systemControls": []
