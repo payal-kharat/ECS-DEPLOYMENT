@@ -22,7 +22,7 @@ pipeline {
 
         AWS_REGION     = 'us-east-1'
         AWS_ACCOUNT_ID = '552940445807'
-
+        AWS_CRED       = 'AWS'
         ECR_REGISTRY =
             "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
@@ -89,7 +89,7 @@ pipeline {
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
-                        "ecr:${env.AWS_REGION}:AWS"
+                        "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
                     ) {
 
                         docker.build(
@@ -136,7 +136,7 @@ pipeline {
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
-                        "ecr:${env.AWS_REGION}:AWS"
+                        "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
                     ) {
 
                         docker.image(env.IMAGE_URI).push()
