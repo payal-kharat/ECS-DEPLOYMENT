@@ -1,4 +1,4 @@
-```groovy
+
 pipeline {
 
     agent any
@@ -379,4 +379,4 @@ pipeline {
 
                             docker push ${targetImage}
 
-```
+
