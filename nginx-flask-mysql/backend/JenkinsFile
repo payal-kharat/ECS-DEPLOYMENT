@@ -26,7 +26,7 @@ pipeline {
         ECR_REGISTRY =
             "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-         BACKEND_REPOSITORY = 'app-1-backend'
+         BACKEND_REPOSITORY = 'app-1-backend-dev'
 
         BUILD_CONTEXT =
             './nginx-flask-mysql/backend'
@@ -89,7 +89,7 @@ pipeline {
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
-                        "ecr:${env.AWS_REGION}:aws-ecr-credentials"
+                        "ecr:${env.AWS_REGION}:AWS"
                     ) {
 
                         docker.build(
@@ -136,7 +136,7 @@ pipeline {
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
-                        "ecr:${env.AWS_REGION}:aws-ecr-credentials"
+                        "ecr:${env.AWS_REGION}:AWS"
                     ) {
 
                         docker.image(env.IMAGE_URI).push()
