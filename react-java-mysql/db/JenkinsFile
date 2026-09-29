@@ -3,72 +3,120 @@ pipeline {
 
     agent any
 
-    parameters {
-
-        choice(
-            name: 'ENVIRONMENT',
-            choices: ['dev', 'qa', 'uat', 'prod'],
-            description: 'Select environment'
-        )
-
-        string(
-            name: 'DEV_IMAGE_TAG',
-            defaultValue: '',
-            description: 'Enter the DEV image tag to promote, e.g. DEV-def5678'
-        )
-    }
-
     environment {
 
         AWS_REGION     = 'us-east-1'
         AWS_ACCOUNT_ID = '552940445807'
 
-        ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        AWS_CRED = 'AWS'
 
-        DB_REPOSITORY = 'app-3-db'
+        ECR_REGISTRY =
+            "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-        BUILD_CONTEXT = './react-java-mysql/db'
+
+        // ============================================================
+        // SEPARATE ECR REPOSITORIES
+        // ============================================================
+
+        DEV_REPO  = 'app-3-db-dev'
+        QA_REPO   = 'app-3-db-qa'
+        UAT_REPO  = 'app-3-db-uat'
+        PROD_REPO = 'app-3-db-prod'
+
+
+        // ============================================================
+        // DOCKER BUILD LOCATION
+        // ============================================================
+
+        BUILD_CONTEXT =
+            './react-java-mysql/db'
+
+
+        // ============================================================
+        // ECS TASK DEFINITION TEMPLATE
+        // ============================================================
 
         TASK_DEFINITION_TEMPLATE =
             './react-java-mysql/db/task-definition.json'
     }
 
-    stages {
-        stage('DEV - Build Image') {
 
-            when {
-                expression {
-                    params.ENVIRONMENT == 'dev'
+    stages {
+
+
+        // ============================================================
+        // 1. CHECKOUT
+        // ============================================================
+
+        stage('Checkout') {
+
+            steps {
+
+                checkout scm
+
+                script {
+
+                    env.COMMIT_ID =
+                        sh(
+                            script: 'git rev-parse --short=7 HEAD',
+                            returnStdout: true
+                        ).trim()
+
+                    echo "======================================"
+                    echo "COMMIT ID = ${env.COMMIT_ID}"
+                    echo "======================================"
                 }
             }
+        }
+
+
+        // ============================================================
+        // 2. DEV - BUILD IMAGE
+        // ============================================================
+
+        stage('DEV - Build Image') {
 
             steps {
 
                 script {
 
-                    def commitId = sh(
-                        script: 'git rev-parse --short=7 HEAD',
-                        returnStdout: true
-                    ).trim()
+                    /*
+                     * Example:
+                     *
+                     * DEV-def5678-25
+                     */
 
-                    def imageTag = "DEV-${commitId}"
+                    def imageTag =
+                        "DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
+
+
+                    env.DEV_IMAGE_TAG =
+                        imageTag
+
 
                     def imageUri =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${imageTag}"
+                        "${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
+
+
+                    env.DEV_IMAGE_URI =
+                        imageUri
+
 
                     echo "======================================"
-                    echo "ENVIRONMENT = dev"
-                    echo "IMAGE TAG   = ${imageTag}"
-                    echo "IMAGE URI   = ${imageUri}"
+                    echo "BUILD ENVIRONMENT = DEV"
+                    echo "COMMIT ID         = ${env.COMMIT_ID}"
+                    echo "IMAGE TAG         = ${imageTag}"
+                    echo "DEV REPOSITORY    = ${env.DEV_REPO}"
+                    echo "IMAGE URI         = ${imageUri}"
                     echo "======================================"
 
-                    env.IMAGE_URI = imageUri
 
-                    echo "Building DB Docker image..."
+                    echo "Building APP-3 DB Docker image..."
+
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
-                        "ecr:${env.AWS_REGION}:aws-ecr-credentials"
+                        "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
                     ) {
 
                         docker.build(
@@ -77,366 +125,576 @@ pipeline {
                         )
                     }
 
-                    echo "Docker image build completed successfully."
-                    echo "IMAGE_URI = ${env.IMAGE_URI}"
+
+                    echo "APP-3 DB Docker image built successfully."
                 }
             }
         }
+
+
+        // ============================================================
+        // 3. DEV - PUSH IMAGE
+        // ============================================================
 
         stage('DEV - Push Image') {
 
-            when {
-                expression {
-                    params.ENVIRONMENT == 'dev'
-                }
-            }
-
             steps {
 
                 script {
 
-                    if (!env.IMAGE_URI?.trim()) {
+                    if (!env.DEV_IMAGE_URI?.trim()) {
 
                         error(
-                            "IMAGE_URI is empty. " +
-                            "Make sure the DEV - Build Image stage completed successfully."
+                            "DEV_IMAGE_URI is empty. " +
+                            "DEV image was not built successfully."
                         )
                     }
 
-                    echo "Pushing DB Docker image..."
-                    echo "IMAGE URI = ${env.IMAGE_URI}"
+
+                    echo "======================================"
+                    echo "PUSHING APP-3 DB IMAGE"
+                    echo "DEV REPOSITORY = ${env.DEV_REPO}"
+                    echo "IMAGE URI       = ${env.DEV_IMAGE_URI}"
+                    echo "======================================"
+
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
-                        "ecr:${env.AWS_REGION}:aws-ecr-credentials"
+                        "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
                     ) {
 
-                        docker.image(env.IMAGE_URI).push()
+                        docker.image(
+                            env.DEV_IMAGE_URI
+                        ).push()
                     }
 
-                    echo "Docker image pushed successfully."
-                    echo "IMAGE_URI = ${env.IMAGE_URI}"
+
+                    echo "APP-3 DB DEV image pushed successfully."
                 }
             }
         }
-        stage('QA - Promote Image') {
 
-            when {
-                expression {
-                    params.ENVIRONMENT == 'qa'
-                }
-            }
+
+        // ============================================================
+        // 4. DEPLOY DEV
+        // ============================================================
+
+        stage('Deploy DB - DEV') {
 
             steps {
 
                 script {
 
-                    if (!params.DEV_IMAGE_TAG?.trim()) {
-                        error(
-                            "DEV_IMAGE_TAG is required for QA promotion."
-                        )
-                    }
-
-                    def sourceTag = params.DEV_IMAGE_TAG
-
-                    def sourceImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
-
-                    def targetTag =
-                        "QA-${sourceTag.replaceFirst('^DEV-', '')}"
-
-                    def targetImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
-
-                    echo "SOURCE IMAGE = ${sourceImage}"
-                    echo "TARGET IMAGE = ${targetImage}"
-
-                    sh """
-                        set -e
-
-                        echo "Logging in to ECR..."
-
-                        aws ecr get-login-password \
-                            --region ${env.AWS_REGION} | \
-                        docker login \
-                            --username AWS \
-                            --password-stdin ${env.ECR_REGISTRY}
-
-                        echo "Pulling DEV image..."
-
-                        docker pull ${sourceImage}
-
-                        echo "Tagging image for QA..."
-
-                        docker tag \
-                            ${sourceImage} \
-                            ${targetImage}
-
-                        echo "Pushing QA image..."
-
-                        docker push ${targetImage}
-                    """
-
-                    env.IMAGE_URI = targetImage
-
-                    echo "IMAGE_URI = ${env.IMAGE_URI}"
+                    deployDB(
+                        'dev',
+                        env.DEV_REPO,
+                        env.DEV_IMAGE_TAG
+                    )
                 }
             }
         }
+
+
+        // ============================================================
+        // 5. DEV → QA PROMOTION
+        // ============================================================
+
+        stage('QA - Promote Image') {
+
+            steps {
+
+                script {
+
+                    promoteImage(
+                        env.DEV_REPO,
+                        env.QA_REPO,
+                        env.DEV_IMAGE_TAG,
+                        'QA'
+                    )
+
+
+                    env.QA_IMAGE_TAG =
+                        "QA-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
+
+
+                    env.QA_IMAGE_URI =
+                        "${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 6. DEPLOY QA
+        // ============================================================
+
+        stage('Deploy DB - QA') {
+
+            steps {
+
+                script {
+
+                    deployDB(
+                        'qa',
+                        env.QA_REPO,
+                        env.QA_IMAGE_TAG
+                    )
+                }
+            }
+        }
+
+
+        // ============================================================
+        // 7. DEV → UAT PROMOTION
+        // ============================================================
 
         stage('UAT - Promote Image') {
 
-            when {
-                expression {
-                    params.ENVIRONMENT == 'uat'
+            steps {
+
+                script {
+
+                    promoteImage(
+                        env.DEV_REPO,
+                        env.UAT_REPO,
+                        env.DEV_IMAGE_TAG,
+                        'UAT'
+                    )
+
+
+                    env.UAT_IMAGE_TAG =
+                        "UAT-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
+
+
+                    env.UAT_IMAGE_URI =
+                        "${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
                 }
             }
+        }
+
+
+        // ============================================================
+        // 8. DEPLOY UAT
+        // ============================================================
+
+        stage('Deploy DB - UAT') {
 
             steps {
 
                 script {
 
-                    if (!params.DEV_IMAGE_TAG?.trim()) {
-                        error(
-                            "DEV_IMAGE_TAG is required for UAT promotion."
-                        )
-                    }
-
-                    def sourceTag = params.DEV_IMAGE_TAG
-
-                    def sourceImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
-
-                    def targetTag =
-                        "UAT-${sourceTag.replaceFirst('^DEV-', '')}"
-
-                    def targetImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
-
-                    echo "SOURCE IMAGE = ${sourceImage}"
-                    echo "TARGET IMAGE = ${targetImage}"
-
-                    sh """
-                        set -e
-
-                        echo "Logging in to ECR..."
-
-                        aws ecr get-login-password \
-                            --region ${env.AWS_REGION} | \
-                        docker login \
-                            --username AWS \
-                            --password-stdin ${env.ECR_REGISTRY}
-
-                        echo "Pulling DEV image..."
-
-                        docker pull ${sourceImage}
-
-                        echo "Tagging image for UAT..."
-
-                        docker tag \
-                            ${sourceImage} \
-                            ${targetImage}
-
-                        echo "Pushing UAT image..."
-
-                        docker push ${targetImage}
-                    """
-
-                    env.IMAGE_URI = targetImage
-
-                    echo "IMAGE_URI = ${env.IMAGE_URI}"
+                    deployDB(
+                        'uat',
+                        env.UAT_REPO,
+                        env.UAT_IMAGE_TAG
+                    )
                 }
             }
         }
+
+
+        // ============================================================
+        // 9. PRODUCTION APPROVAL
+        // ============================================================
+
+        stage('Production Approval') {
+
+            steps {
+
+                input(
+                    message:
+                        'DEV, QA and UAT DB deployment completed. Deploy APP-3 DB to PROD?',
+
+                    ok:
+                        'Deploy to PROD'
+                )
+            }
+        }
+
+
+        // ============================================================
+        // 10. DEV → PROD PROMOTION
+        // ============================================================
 
         stage('PROD - Promote Image') {
 
-            when {
-                expression {
-                    params.ENVIRONMENT == 'prod'
-                }
-            }
-
             steps {
 
                 script {
 
-                    if (!params.DEV_IMAGE_TAG?.trim()) {
-                        error(
-                            "DEV_IMAGE_TAG is required for PROD promotion."
-                        )
-                    }
+                    promoteImage(
+                        env.DEV_REPO,
+                        env.PROD_REPO,
+                        env.DEV_IMAGE_TAG,
+                        'PROD'
+                    )
 
-                    def sourceTag = params.DEV_IMAGE_TAG
 
-                    def sourceImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${sourceTag}"
+                    env.PROD_IMAGE_TAG =
+                        "PROD-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
 
-                    def targetTag =
-                        "PROD-${sourceTag.replaceFirst('^DEV-', '')}"
 
-                    def targetImage =
-                        "${env.ECR_REGISTRY}/${env.DB_REPOSITORY}:${targetTag}"
-
-                    echo "SOURCE IMAGE = ${sourceImage}"
-                    echo "TARGET IMAGE = ${targetImage}"
-
-                    sh """
-                        set -e
-
-                        echo "Logging in to ECR..."
-
-                        aws ecr get-login-password \
-                            --region ${env.AWS_REGION} | \
-                        docker login \
-                            --username AWS \
-                            --password-stdin ${env.ECR_REGISTRY}
-
-                        echo "Pulling DEV image..."
-
-                        docker pull ${sourceImage}
-
-                        echo "Tagging image for PROD..."
-
-                        docker tag \
-                            ${sourceImage} \
-                            ${targetImage}
-
-                        echo "Pushing PROD image..."
-
-                        docker push ${targetImage}
-                    """
-
-                    env.IMAGE_URI = targetImage
-
-                    echo "IMAGE_URI = ${env.IMAGE_URI}"
+                    env.PROD_IMAGE_URI =
+                        "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
                 }
             }
         }
 
-        stage('Create Task Definition') {
+
+        // ============================================================
+        // 11. DEPLOY PROD
+        // ============================================================
+
+        stage('Deploy DB - PROD') {
 
             steps {
 
                 script {
 
-                    if (!env.IMAGE_URI?.trim()) {
-                        error("IMAGE_URI is empty.")
-                    }
-
-                    echo "IMAGE URI = ${env.IMAGE_URI}"
-                    echo "ENVIRONMENT = ${params.ENVIRONMENT}"
-
-                    sh """
-                        set -e
-
-                        ENVIRONMENT="${params.ENVIRONMENT}" \
-                        IMAGE_URI="${env.IMAGE_URI}" \
-                        TASK_DEFINITION_TEMPLATE="${env.TASK_DEFINITION_TEMPLATE}" \
-                        python3 - <<'PY'
-
-import json
-import os
-
-input_file = os.environ["TASK_DEFINITION_TEMPLATE"]
-output_file = "new-db-task-definition.json"
-
-environment = os.environ["ENVIRONMENT"]
-image_uri = os.environ["IMAGE_URI"]
-
-with open(input_file, "r") as f:
-    task_definition = json.load(f)
-
-task_definition["family"] = f"app-3-{environment}-db"
-
-for container in task_definition["containerDefinitions"]:
-
-    if container["name"] == "db":
-        container["image"] = image_uri
-        break
-
-else:
-    raise Exception("Container named 'db' was not found.")
-
-with open(output_file, "w") as f:
-    json.dump(task_definition, f, indent=2)
-
-PY
-
-                        echo "Generated task definition:"
-                        cat new-db-task-definition.json
-                    """
-                }
-            }
-        }
-
-        stage('Register and Update ECS Service') {
-
-            steps {
-
-                script {
-
-                    def revision = sh(
-                        script: """
-                            set -e
-
-                            aws ecs register-task-definition \
-                                --cli-input-json file://new-db-task-definition.json \
-                                --region ${env.AWS_REGION} \
-                                --query 'taskDefinition.revision' \
-                                --output text
-                        """,
-                        returnStdout: true
-                    ).trim()
-
-                    echo "AWS REGISTERED REVISION = '${revision}'"
-
-                    if (!revision ||
-                        revision == 'null' ||
-                        revision == 'None') {
-
-                        error(
-                            "ECS returned invalid revision: '${revision}'"
-                        )
-                    }
-
-                    def environment =
-                        params.ENVIRONMENT
-
-                    def cluster =
-                        "app-3-${environment}-cluster"
-
-                    def service =
-                        "app-3-${environment}-db-service"
-
-                    def taskFamily =
-                        "app-3-${environment}-db"
-
-                    echo "ENVIRONMENT = ${environment}"
-                    echo "CLUSTER = ${cluster}"
-                    echo "SERVICE = ${service}"
-                    echo "TASK FAMILY = ${taskFamily}"
-                    echo "TASK REVISION = ${revision}"
-
-                    sh """
-                        set -e
-
-                        aws ecs update-service \
-                            --cluster ${cluster} \
-                            --service ${service} \
-                            --task-definition ${taskFamily}:${revision} \
-                            --force-new-deployment \
-                            --region ${env.AWS_REGION}
-
-                        aws ecs wait services-stable \
-                            --cluster ${cluster} \
-                            --services ${service} \
-                            --region ${env.AWS_REGION}
-                    """
-
-                    echo "ECS ${environment} deployment completed successfully."
+                    deployDB(
+                        'prod',
+                        env.PROD_REPO,
+                        env.PROD_IMAGE_TAG
+                    )
                 }
             }
         }
     }
+
+
+    // ================================================================
+    // POST ACTIONS
+    // ================================================================
+
+    post {
+
+        always {
+
+            echo 'Cleaning Jenkins workspace...'
+
+            cleanWs()
+        }
+
+
+        success {
+
+            echo '''
+============================================================
+APP-3 DB ECS CI/CD completed successfully.
+
+DEV  → QA → UAT → PROD
+
+DB image was built ONLY ONCE in DEV.
+
+The same image was promoted to:
+    DEV
+    QA
+    UAT
+    PROD
+
+No rebuild was performed in QA, UAT or PROD.
+============================================================
+'''
+        }
+
+
+        failure {
+
+            echo '''
+============================================================
+APP-3 DB ECS CI/CD FAILED.
+
+Check the Jenkins console output.
+============================================================
+'''
+        }
+    }
 }
+
+
+// ====================================================================
+// FUNCTION: PROMOTE IMAGE
+// ====================================================================
+
+def promoteImage(
+    String sourceRepo,
+    String targetRepo,
+    String sourceTag,
+    String targetEnvironment
+) {
+
+    def sourceImage =
+        "${env.ECR_REGISTRY}/${sourceRepo}:${sourceTag}"
+
+
+    def targetTag =
+        "${targetEnvironment}-${sourceTag.replaceFirst('^DEV-', '')}"
+
+
+    def targetImage =
+        "${env.ECR_REGISTRY}/${targetRepo}:${targetTag}"
+
+
+    echo "============================================================"
+    echo "PROMOTING APP-3 DB IMAGE"
+    echo "============================================================"
+    echo "SOURCE REPOSITORY : ${sourceRepo}"
+    echo "SOURCE IMAGE      : ${sourceImage}"
+    echo "TARGET REPOSITORY : ${targetRepo}"
+    echo "TARGET IMAGE      : ${targetImage}"
+    echo "============================================================"
+
+
+    withCredentials([
+        [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: "${env.AWS_CRED}"
+        ]
+    ]) {
+
+        sh """
+            set -e
+
+            echo "AWS Identity:"
+
+            aws sts get-caller-identity
+
+
+            echo "Logging in to ECR..."
+
+            aws ecr get-login-password \
+                --region ${env.AWS_REGION} \
+                | docker login \
+                    --username AWS \
+                    --password-stdin ${env.ECR_REGISTRY}
+
+
+            echo "Pulling DEV image..."
+
+            docker pull ${sourceImage}
+
+
+            echo "Tagging image..."
+
+            docker tag \
+                ${sourceImage} \
+                ${targetImage}
+
+
+            echo "Pushing promoted image..."
+
+            docker push ${targetImage}
+
+
+            echo "============================================================"
+            echo "PROMOTION COMPLETED"
+            echo "TARGET IMAGE: ${targetImage}"
+            echo "============================================================"
+        """
+    }
+}
+
+
+// ====================================================================
+// FUNCTION: DEPLOY DB TO ECS
+// ====================================================================
+
+def deployDB(
+    String environment,
+    String repository,
+    String imageTag
+) {
+
+    def imageUri =
+        "${env.ECR_REGISTRY}/${repository}:${imageTag}"
+
+
+    def taskDefinitionFile =
+        "new-db-task-definition-${environment}.json"
+
+
+    echo "============================================================"
+    echo "DEPLOYING APP-3 DB"
+    echo "============================================================"
+    echo "Environment : ${environment}"
+    echo "Repository  : ${repository}"
+    echo "Image Tag   : ${imageTag}"
+    echo "Image URI   : ${imageUri}"
+    echo "============================================================"
+
+
+    withCredentials([
+        [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: "${env.AWS_CRED}"
+        ]
+    ]) {
+
+        sh """
+            set -e
+
+            echo "AWS Identity:"
+
+            aws sts get-caller-identity
+
+
+            echo "Creating ECS task definition for ${environment}..."
+
+
+            ENVIRONMENT="${environment}" \
+            IMAGE_URI="${imageUri}" \
+            TASK_DEFINITION_TEMPLATE="${env.TASK_DEFINITION_TEMPLATE}" \
+            OUTPUT_FILE="${taskDefinitionFile}" \
+            python3 - <<'PYTHON'
+
+import json
+import os
+
+
+input_file = os.environ["TASK_DEFINITION_TEMPLATE"]
+output_file = os.environ["OUTPUT_FILE"]
+environment = os.environ["ENVIRONMENT"]
+image_uri = os.environ["IMAGE_URI"]
+
+
+# Read original task definition
+
+with open(input_file, "r") as f:
+
+    task_definition = json.load(f)
+
+
+# Set environment-specific family
+
+task_definition["family"] = \
+    f"app-3-{environment}-db"
+
+
+# Update DB container image
+
+container_found = False
+
+for container in task_definition["containerDefinitions"]:
+
+    if container["name"] == "db":
+
+        container["image"] = image_uri
+
+        container_found = True
+
+        break
+
+
+if not container_found:
+
+    raise Exception(
+        "Container named 'db' was not found."
+    )
+
+
+# Remove AWS-generated fields
+
+remove_fields = [
+
+    "taskDefinitionArn",
+
+    "revision",
+
+    "status",
+
+    "requiresAttributes",
+
+    "compatibilities",
+
+    "registeredAt",
+
+    "registeredBy"
+]
+
+
+for field in remove_fields:
+
+    task_definition.pop(
+        field,
+        None
+    )
+
+
+# Write new task definition
+
+with open(output_file, "w") as f:
+
+    json.dump(
+        task_definition,
+        f,
+        indent=2
+    )
+
+
+print("Task definition created:")
+print(output_file)
+
+
+print("DB image:")
+print(image_uri)
+
+PYTHON
+
+
+            echo "Generated task definition:"
+
+            cat ${taskDefinitionFile}
+
+
+            echo "Registering ECS task definition..."
+
+
+            REVISION=\$(aws ecs register-task-definition \
+                --cli-input-json file://${taskDefinitionFile} \
+                --region ${env.AWS_REGION} \
+                --query 'taskDefinition.revision' \
+                --output text)
+
+
+            echo "AWS REGISTERED REVISION = \$REVISION"
+
+
+            if [ -z "\$REVISION" ] || \
+               [ "\$REVISION" = "null" ] || \
+               [ "\$REVISION" = "None" ]; then
+
+                echo "ERROR: ECS returned invalid revision."
+
+                exit 1
+
+            fi
+
+
+            echo "Updating ECS DB service..."
+
+
+            aws ecs update-service \
+                --cluster app-3-${environment}-cluster \
+                --service app-3-${environment}-db-service \
+                --task-definition app-3-${environment}-db:\$REVISION \
+                --force-new-deployment \
+                --region ${env.AWS_REGION}
+
+
+            echo "Waiting for ECS DB service to become stable..."
+
+
+            aws ecs wait services-stable \
+                --cluster app-3-${environment}-cluster \
+                --services app-3-${environment}-db-service \
+                --region ${env.AWS_REGION}
+
+
+            echo "============================================================"
+            echo "APP-3 DB ${environment} deployment completed."
+            echo "Image: ${imageUri}"
+            echo "============================================================"
+        """
+    }
+}
+
