@@ -8,7 +8,7 @@ pipeline {
         AWS_REGION     = 'us-east-1'
         AWS_ACCOUNT_ID = '552940445807'
 
-        AWS_CRED = 'aws-ecr-credentials'
+        AWS_CRED = 'AWS'
 
         ECR_REGISTRY =
             "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
