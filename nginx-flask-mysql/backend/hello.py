@@ -32,7 +32,9 @@ class DBManager:
 
 server = Flask(__name__)
 conn = None
-
+@server.route('/health')
+def health():
+    return "OK", 200
 @server.route('/')
 def listBlog():
     global conn
