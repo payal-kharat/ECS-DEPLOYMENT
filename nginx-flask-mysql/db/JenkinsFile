@@ -13,20 +13,30 @@ pipeline {
 
         AWS_CRED = 'AWS'
 
-        // ECR repositories
-        DEV_REPO  = 'app-1-backend-dev'
-        QA_REPO   = 'app-1-backend-qa'
-        UAT_REPO  = 'app-1-backend-uat'
-        PROD_REPO = 'app-1-backend-prod'
+        // ============================================================
+        // ECR REPOSITORIES
+        // ============================================================
 
-        // Docker build location
+        DEV_REPO  = 'app-1-db-dev'
+        QA_REPO   = 'app-1-db-qa'
+        UAT_REPO  = 'app-1-db-uat'
+        PROD_REPO = 'app-1-db-prod'
+
+        // ============================================================
+        // DOCKER BUILD LOCATION
+        // ============================================================
+
         BUILD_CONTEXT =
-            './nginx-flask-mysql/backend'
+            './nginx-flask-mysql/db'
 
-        // ECS task definition template
+        // ============================================================
+        // ECS TASK DEFINITION TEMPLATE
+        // ============================================================
+
         TASK_DEFINITION_TEMPLATE =
-            './nginx-flask-mysql/backend/task-definition.json'
+            './nginx-flask-mysql/db/task-definition.json'
     }
+
 
     stages {
 
@@ -55,10 +65,10 @@ pipeline {
 
 
         // ============================================================
-        // 2. BUILD BACKEND IMAGE ONLY IN DEV
+        // 2. BUILD DB IMAGE ONLY IN DEV
         // ============================================================
 
-        stage('Build Backend Image - DEV') {
+        stage('Build DB Image - DEV') {
 
             steps {
 
@@ -72,8 +82,10 @@ pipeline {
                     def imageUri =
                         "${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
 
-                    echo "Building Backend Image:"
-                    echo "${imageUri}"
+                    echo "============================================================"
+                    echo "Building DB Image"
+                    echo "Image: ${imageUri}"
+                    echo "============================================================"
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
@@ -91,10 +103,10 @@ pipeline {
 
 
         // ============================================================
-        // 3. PUSH DEV IMAGE
+        // 3. PUSH DB IMAGE - DEV
         // ============================================================
 
-        stage('Push Backend Image - DEV') {
+        stage('Push DB Image - DEV') {
 
             steps {
 
@@ -103,8 +115,10 @@ pipeline {
                     def imageUri =
                         "${env.ECR_REGISTRY}/${env.DEV_REPO}:${env.DEV_IMAGE_TAG}"
 
-                    echo "Pushing DEV image:"
-                    echo "${imageUri}"
+                    echo "============================================================"
+                    echo "Pushing DEV DB Image"
+                    echo "Image: ${imageUri}"
+                    echo "============================================================"
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
@@ -119,16 +133,16 @@ pipeline {
 
 
         // ============================================================
-        // 4. DEPLOY DEV
+        // 4. DEPLOY DB - DEV
         // ============================================================
 
-        stage('Deploy Backend - DEV') {
+        stage('Deploy DB - DEV') {
 
             steps {
 
                 script {
 
-                    deployBackend(
+                    deployDB(
                         'dev',
                         env.DEV_REPO,
                         env.DEV_IMAGE_TAG
@@ -142,7 +156,7 @@ pipeline {
         // 5. PROMOTE DEV → QA
         // ============================================================
 
-        stage('Promote Backend - DEV to QA') {
+        stage('Promote DB - DEV to QA') {
 
             steps {
 
@@ -163,16 +177,16 @@ pipeline {
 
 
         // ============================================================
-        // 6. DEPLOY QA
+        // 6. DEPLOY DB - QA
         // ============================================================
 
-        stage('Deploy Backend - QA') {
+        stage('Deploy DB - QA') {
 
             steps {
 
                 script {
 
-                    deployBackend(
+                    deployDB(
                         'qa',
                         env.QA_REPO,
                         env.QA_IMAGE_TAG
@@ -186,7 +200,7 @@ pipeline {
         // 7. PROMOTE DEV → UAT
         // ============================================================
 
-        stage('Promote Backend - DEV to UAT') {
+        stage('Promote DB - DEV to UAT') {
 
             steps {
 
@@ -207,16 +221,16 @@ pipeline {
 
 
         // ============================================================
-        // 8. DEPLOY UAT
+        // 8. DEPLOY DB - UAT
         // ============================================================
 
-        stage('Deploy Backend - UAT') {
+        stage('Deploy DB - UAT') {
 
             steps {
 
                 script {
 
-                    deployBackend(
+                    deployDB(
                         'uat',
                         env.UAT_REPO,
                         env.UAT_IMAGE_TAG
@@ -227,7 +241,7 @@ pipeline {
 
 
         // ============================================================
-        // 9. MANUAL APPROVAL
+        // 9. MANUAL PRODUCTION APPROVAL
         // ============================================================
 
         stage('Production Approval') {
@@ -235,7 +249,7 @@ pipeline {
             steps {
 
                 input(
-                    message: 'DEV, QA and UAT deployment completed. Deploy Backend to PROD?',
+                    message: 'DEV, QA and UAT DB deployment completed. Deploy DB to PROD?',
                     ok: 'Deploy to PROD'
                 )
             }
@@ -246,7 +260,7 @@ pipeline {
         // 10. PROMOTE DEV → PROD
         // ============================================================
 
-        stage('Promote Backend - DEV to PROD') {
+        stage('Promote DB - DEV to PROD') {
 
             steps {
 
@@ -267,16 +281,16 @@ pipeline {
 
 
         // ============================================================
-        // 11. DEPLOY PROD
+        // 11. DEPLOY DB - PROD
         // ============================================================
 
-        stage('Deploy Backend - PROD') {
+        stage('Deploy DB - PROD') {
 
             steps {
 
                 script {
 
-                    deployBackend(
+                    deployDB(
                         'prod',
                         env.PROD_REPO,
                         env.PROD_IMAGE_TAG
@@ -288,7 +302,7 @@ pipeline {
 
 
     // ================================================================
-    // POST
+    // POST ACTIONS
     // ================================================================
 
     post {
@@ -304,11 +318,11 @@ pipeline {
 
             echo '''
 ============================================================
-Backend ECS CI/CD completed successfully.
+DB ECS CI/CD completed successfully.
 
 DEV  → QA → UAT → PROD
 
-Image was built only once in DEV.
+DB image was built only once in DEV.
 The same image was promoted to QA, UAT and PROD.
 ============================================================
 '''
@@ -318,7 +332,8 @@ The same image was promoted to QA, UAT and PROD.
 
             echo '''
 ============================================================
-Backend ECS CI/CD FAILED.
+DB ECS CI/CD FAILED.
+
 Check the Jenkins console output.
 ============================================================
 '''
@@ -347,11 +362,13 @@ def promoteImage(
     def targetImage =
         "${env.ECR_REGISTRY}/${targetRepo}:${targetTag}"
 
+
     echo "============================================================"
-    echo "Promoting image"
+    echo "Promoting DB image"
     echo "SOURCE : ${sourceImage}"
     echo "TARGET : ${targetImage}"
     echo "============================================================"
+
 
     withCredentials([
         [
@@ -364,7 +381,9 @@ def promoteImage(
             set -e
 
             echo "AWS Identity:"
+
             aws sts get-caller-identity
+
 
             echo "Logging into ECR..."
 
@@ -374,21 +393,26 @@ def promoteImage(
                     --username AWS \
                     --password-stdin ${env.ECR_REGISTRY}
 
-            echo "Pulling DEV image..."
+
+            echo "Pulling DEV DB image..."
 
             docker pull ${sourceImage}
 
-            echo "Retagging image..."
+
+            echo "Retagging DB image..."
 
             docker tag \
                 ${sourceImage} \
                 ${targetImage}
 
-            echo "Pushing promoted image..."
+
+            echo "Pushing promoted DB image..."
 
             docker push ${targetImage}
 
+
             echo "Promotion completed:"
+
             echo "${targetImage}"
         """
     }
@@ -396,10 +420,10 @@ def promoteImage(
 
 
 // ====================================================================
-// FUNCTION: DEPLOY BACKEND TO ECS
+// FUNCTION: DEPLOY DB TO ECS
 // ====================================================================
 
-def deployBackend(
+def deployDB(
     String environment,
     String repository,
     String imageTag
@@ -409,13 +433,15 @@ def deployBackend(
         "${env.ECR_REGISTRY}/${repository}:${imageTag}"
 
     def taskDefinitionFile =
-        "new-backend-task-definition-${environment}.json"
+        "new-db-task-definition-${environment}.json"
+
 
     echo "============================================================"
-    echo "Deploying Backend"
+    echo "Deploying DB"
     echo "Environment : ${environment}"
     echo "Image       : ${imageUri}"
     echo "============================================================"
+
 
     withCredentials([
         [
@@ -428,38 +454,60 @@ def deployBackend(
             set -e
 
             echo "AWS Identity:"
+
             aws sts get-caller-identity
 
-            echo "Creating task definition for ${environment}..."
+
+            echo "Creating DB task definition for ${environment}..."
+
 
             python3 - <<PYTHON
+
 import json
 
+
 with open("${env.TASK_DEFINITION_TEMPLATE}") as f:
+
     task_definition = json.load(f)
 
+
+# Set environment-specific task definition family
+
 task_definition["family"] = \
-    "app-1-${environment}-backend"
+    "app-1-${environment}-db"
+
+
+# Update DB container image
 
 for container in task_definition["containerDefinitions"]:
 
-    if container["name"] == "backend":
+    if container["name"] == "db":
 
         container["image"] = \
             "${imageUri}"
 
-# Remove fields returned by describe-task-definition
-# which are not accepted during registration.
+
+# Remove fields returned by
+# describe-task-definition which cannot
+# be passed back during registration.
 
 remove_fields = [
+
     "taskDefinitionArn",
+
     "revision",
+
     "status",
+
     "requiresAttributes",
+
     "compatibilities",
+
     "registeredAt",
+
     "registeredBy"
 ]
+
 
 for field in remove_fields:
 
@@ -467,6 +515,9 @@ for field in remove_fields:
         field,
         None
     )
+
+
+# Save new task definition
 
 with open("${taskDefinitionFile}", "w") as f:
 
@@ -476,15 +527,21 @@ with open("${taskDefinitionFile}", "w") as f:
         indent=2
     )
 
+
 print("Task definition created:")
+
 print("${taskDefinitionFile}")
 
-print("Image:")
+
+print("DB Image:")
+
 print("${imageUri}")
+
 PYTHON
 
 
-            echo "Registering ECS task definition..."
+            echo "Registering ECS DB task definition..."
+
 
             REVISION=\$(aws ecs register-task-definition \
                 --cli-input-json file://${taskDefinitionFile} \
@@ -492,29 +549,32 @@ PYTHON
                 --query 'taskDefinition.revision' \
                 --output text)
 
+
             echo "Registered revision: \$REVISION"
 
 
-            echo "Updating ECS service..."
+            echo "Updating ECS DB service..."
+
 
             aws ecs update-service \
                 --cluster app-1-${environment}-cluster \
-                --service app-1-${environment}-backend-service \
-                --task-definition app-1-${environment}-backend:\$REVISION \
+                --service app-1-${environment}-db-service \
+                --task-definition app-1-${environment}-db:\$REVISION \
                 --force-new-deployment \
                 --region ${env.AWS_REGION}
 
 
-            echo "Waiting for ECS service to become stable..."
+            echo "Waiting for ECS DB service to become stable..."
+
 
             aws ecs wait services-stable \
                 --cluster app-1-${environment}-cluster \
-                --services app-1-${environment}-backend-service \
+                --services app-1-${environment}-db-service \
                 --region ${env.AWS_REGION}
 
 
             echo "============================================================"
-            echo "Backend ${environment} deployment completed."
+            echo "DB ${environment} deployment completed."
             echo "Image: ${imageUri}"
             echo "============================================================"
         """
