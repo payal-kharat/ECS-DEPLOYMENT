@@ -2,40 +2,43 @@
   "containerDefinitions": [
     {
       "name": "frontend",
-      "image": "nginx:1.13-alpine",
-      "cpu": 0,
+      "image": "552940445807.dkr.ecr.us-east-1.amazonaws.com/app-1-frontend-dev@sha256:a76ff556609ec7260ec46368b95c49fb5137ffd29280afc8ad447df3f3013c9b",
+      "cpu": 2048,
+      "memory": 2048,
+      "memoryReservation": 1024,
       "portMappings": [
         {
           "containerPort": 80,
           "hostPort": 80,
           "protocol": "tcp",
-          "name": "frontend"
+          "name": "frontend",
+          "appProtocol": "http"
         }
       ],
       "essential": true,
       "environment": [],
       "mountPoints": [],
       "volumesFrom": [],
-       "logConfiguration": {
+      "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/app-1-dev-db",
+          "awslogs-group": "/ecs/app-1-dev-frontend",
           "awslogs-create-group": "true",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
         },
         "secretOptions": []
       },
-
       "systemControls": []
     }
   ],
   "family": "app-1-dev-frontend",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/app-1-ecs-execution-role",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
+  
   "requiresCompatibilities": [
     "FARGATE"
   ],
-  "cpu": "256",
-  "memory": "512"
+  "cpu": "2048",
+  "memory": "4096"
 }
