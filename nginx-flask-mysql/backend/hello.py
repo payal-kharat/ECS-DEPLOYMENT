@@ -4,16 +4,21 @@ import mysql.connector
 
 
 class DBManager:
-    def __init__(self, database='example', host="app1-db.app1.local", user="root", password_file=None):
-        pf = open(password_file, 'r')
+    def __init__(
+        self,
+        database=os.getenv("DB_NAME", "example"),
+        host=os.getenv("DB_HOST", "db"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD")
+    ):
         self.connection = mysql.connector.connect(
-            user=user, 
-            password=pf.read(),
-            host=host, # name of the mysql service as set in the docker compose file
+            user=user,
+            password=password,
+            host=host,
             database=database,
+            port=int(os.getenv("DB_PORT", "3306")),
             auth_plugin='mysql_native_password'
         )
-        pf.close()
         self.cursor = self.connection.cursor()
     
     def populate_db(self):
