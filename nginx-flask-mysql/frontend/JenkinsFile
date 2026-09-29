@@ -291,23 +291,7 @@ pipeline {
         }
 
 
-        // ============================================================
-        // 9. PRODUCTION APPROVAL
-        // ============================================================
-
-        stage('Production Approval') {
-
-            steps {
-
-                input(
-                    message:
-                        'DEV, QA and UAT frontend deployment completed. Deploy Frontend to PROD?',
-
-                    ok:
-                        'Deploy to PROD'
-                )
-            }
-        }
+        
 
 
         // ============================================================
@@ -335,6 +319,24 @@ pipeline {
                     env.PROD_IMAGE_URI =
                         "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
                 }
+            }
+        }
+        
+         // ============================================================
+        // 9. PRODUCTION APPROVAL
+        // ============================================================
+
+        stage('Production Approval') {
+
+            steps {
+
+                input(
+                    message:
+                        'DEV, QA and UAT frontend deployment completed. Deploy Frontend to PROD?',
+
+                    ok:
+                        'Deploy to PROD'
+                )
             }
         }
 
