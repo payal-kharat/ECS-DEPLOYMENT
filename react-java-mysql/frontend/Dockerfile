@@ -1,24 +1,52 @@
-# syntax=docker/dockerfile:1.4
-
-FROM node:lts AS build
+FROM node:lts AS development
 
 WORKDIR /code
 
-COPY package.json package-lock.json ./
-COPY .npmrc ./
-COPY .yarnrc.yml ./
+COPY package.json /code/package.json
+COPY package-lock.json /code/package-lock.json
 
+COPY .npmrc .
+COPY .yarnrc.yml .
 RUN npm ci
 
-COPY . .
+COPY . /code
 
-RUN npm run build
+ENV CI=true
+ENV PORT=3000
 
+CMD [ "npm", "start" ]
+
+FROM development AS dev-envs
+
+RUN <<EOF
+apt-get update
+apt-get install -y git
+EOF
+
+RUN <<EOF
+useradd -s /bin/bash -m vscode
+groupadd docker
+usermod -aG docker vscode
+EOF
+
+COPY --from=gloursdocker/docker / /
+
+CMD [ "npm", "start" ]
+
+FROM development AS build
+
+RUN ["npm", "run", "build"]
 
 FROM nginx:1.13-alpine
 
+RUN apk add --no-cache gettext
+
 COPY --from=build /code/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
