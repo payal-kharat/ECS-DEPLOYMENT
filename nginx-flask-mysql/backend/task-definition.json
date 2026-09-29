@@ -2,7 +2,7 @@
   "containerDefinitions": [
     {
       "name": "backend",
-      "image": "python:3.10-alpine",
+      "image": "552940445807.dkr.ecr.us-east-1.amazonaws.com/app-1-backend-dev:DEV-461213c-7",
       "cpu": 0,
       "portMappings": [
         {
@@ -14,27 +14,26 @@
       ],
       "essential": true,
       "environment": [
-  {
-    "name": "MYSQL_HOST",
-    "value": "app1-db"
-  },
-  {
-    "name": "MYSQL_DATABASE",
-    "value": "example"
-  },
-  {
-    "name": "MYSQL_USER",
-    "value": "root"
-  },
- {
-    "name": "DB_PASSWORD",
-    "value": "rootpassword"
- }
-
-],
+        {
+          "name": "MYSQL_DATABASE",
+          "value": "example"
+        },
+        {
+          "name": "MYSQL_HOST",
+          "value": "app1-db.app1.local"
+        },
+        {
+          "name": "MYSQL_USER",
+          "value": "root"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "value": "rootpassword"
+        }
+      ],
       "mountPoints": [],
       "volumesFrom": [],
-       "logConfiguration": {
+      "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
           "awslogs-group": "/ecs/app-1-dev-db",
@@ -44,12 +43,11 @@
         },
         "secretOptions": []
       },
-
       "systemControls": []
     }
   ],
   "family": "app-1-dev-backend",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/app-1-ecs-execution-role",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
