@@ -258,19 +258,24 @@ def deployDB(
             credentialsId: "${env.AWS_CRED}"
         ]
     ]) {
-        sh """
-            set -e
 
-            aws sts get-caller-identity
+        withEnv([
+            "TASK_DEFINITION_TEMPLATE=${env.TASK_DEFINITION_TEMPLATE}",
+            "TASK_DEFINITION_FILE=${taskDefinitionFile}",
+            "IMAGE_URI=${imageUri}",
+            "DEPLOY_ENV=${environment}",
+            "AWS_REGION_VALUE=${env.AWS_REGION}",
+            "ECR_REGISTRY_VALUE=${env.ECR_REGISTRY}"
+        ]) {
 
-            echo "Creating DB task definition for ${environment}..."
+            sh '''
+                set -e
 
-            export TASK_DEFINITION_TEMPLATE='${env.TASK_DEFINITION_TEMPLATE}'
-            export TASK_DEFINITION_FILE='${taskDefinitionFile}'
-            export IMAGE_URI='${imageUri}'
-            export DEPLOY_ENV='${environment}'
+                aws sts get-caller-identity
 
-            python3 - <<'PYTHON'
+                echo "Creating DB task definition for ${DEPLOY_ENV}..."
+
+                python3 - <<'PYTHON'
 
 import json
 import os
@@ -317,37 +322,38 @@ print(image_uri)
 
 PYTHON
 
-            echo "Registering ECS DB task definition..."
+                echo "Registering ECS DB task definition..."
 
-            REVISION=\\$(aws ecs register-task-definition \
-                --cli-input-json file://${taskDefinitionFile} \
-                --region ${env.AWS_REGION} \
-                --query 'taskDefinition.revision' \
-                --output text)
+                REVISION=$(aws ecs register-task-definition \
+                    --cli-input-json file://${TASK_DEFINITION_FILE} \
+                    --region ${AWS_REGION_VALUE} \
+                    --query 'taskDefinition.revision' \
+                    --output text)
 
-            echo "Registered revision: \\$REVISION"
+                echo "Registered revision: ${REVISION}"
 
-            echo "Updating ECS DB service..."
+                echo "Updating ECS DB service..."
 
-            aws ecs update-service \
-                --cluster app-1-${environment}-cluster \
-                --service app-1-${environment}-db-service \
-                --task-definition app-1-${environment}-db:\\$REVISION \
-                --force-new-deployment \
-                --region ${env.AWS_REGION}
+                aws ecs update-service \
+                    --cluster app-1-${DEPLOY_ENV}-cluster \
+                    --service app-1-${DEPLOY_ENV}-db-service \
+                    --task-definition app-1-${DEPLOY_ENV}-db:${REVISION} \
+                    --force-new-deployment \
+                    --region ${AWS_REGION_VALUE}
 
-            echo "Waiting for ECS DB service to become stable..."
+                echo "Waiting for ECS DB service to become stable..."
 
-            aws ecs wait services-stable \
-                --cluster app-1-${environment}-cluster \
-                --services app-1-${environment}-db-service \
-                --region ${env.AWS_REGION}
+                aws ecs wait services-stable \
+                    --cluster app-1-${DEPLOY_ENV}-cluster \
+                    --services app-1-${DEPLOY_ENV}-db-service \
+                    --region ${AWS_REGION_VALUE}
 
-            echo "DB deployment completed successfully."
+                echo "DB deployment completed successfully."
 
-            echo "Environment: ${environment}"
-            echo "Task Definition: app-1-${environment}-db:\\$REVISION"
-            echo "Image: ${imageUri}"
-        """
+                echo "Environment: ${DEPLOY_ENV}"
+                echo "Task Definition: app-1-${DEPLOY_ENV}-db:${REVISION}"
+                echo "Image: ${IMAGE_URI}"
+            '''
+        }
     }
 }
