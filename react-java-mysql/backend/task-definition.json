@@ -2,43 +2,56 @@
   "containerDefinitions": [
     {
       "name": "backend",
-      "image": "python:3.10-alpine",
+      "image": "552940445807.dkr.ecr.us-east-1.amazonaws.com/app-3-backend-dev@sha256:cac1ad2e7c5ae93db525bfac73620875d744269d05ffe7e54b0e75708e6af8fc",
       "cpu": 0,
       "portMappings": [
         {
           "containerPort": 8080,
           "hostPort": 8080,
           "protocol": "tcp",
-          "name": "backend"
+          "name": "backend",
+          "appProtocol": "http"
         }
       ],
       "essential": true,
       "environment": [
-  {
-    "name": "MYSQL_DATABASE",
-    "value": "example"
-  },
-  {
-    "name": "MYSQL_HOST",
-    "value": "app3-db"
-  },
-  {
-    "name": "MYSQL_USER",
-    "value": "root"
-  }
-],
-      "mountPoints": [],
-      "volumesFrom": [],
+        {
+          "name": "MYSQL_DATABASE",
+          "value": "example"
+        },
+        {
+          "name": "MYSQL_PASSWORD",
+          "value": "rootpassword"
+        },
+        {
+          "name": "MYSQL_HOST",
+          "value": "app3-db.app3.local"
+        },
+        {
+          "name": "MYSQL_USER",
+          "value": "root"
+        }
+      ],
+      "environmentFiles": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/app-3-dev-backend",
+          "awslogs-create-group": "true",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        },
+        "secretOptions": []
+      },
       "systemControls": []
     }
   ],
   "family": "app-3-dev-backend",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/app-3-ecs-execution-role",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
   ],
-  "cpu": "256",
-  "memory": "512"
+  "cpu": "1024",
+  "memory": "3072"
 }
-
