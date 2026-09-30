@@ -11,7 +11,7 @@
           "containerPort": 3306,
           "hostPort": 3306,
           "protocol": "tcp",
-          "name": "mysql",
+          "name": "db",
           "appProtocol": "http"
         }
       ],
