@@ -1,11 +1,10 @@
-
 pipeline {
     agent any
-    environment {
 
+    environment {
         AWS_REGION     = 'us-east-1'
         AWS_ACCOUNT_ID = '552940445807'
-        ECR_REGISTRY   =  "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        ECR_REGISTRY   = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         AWS_CRED       = 'AWS'
 
         DEV_REPO  = 'app-1-db-dev'
@@ -13,24 +12,21 @@ pipeline {
         // UAT_REPO  = 'app-1-db-uat'
         // PROD_REPO = 'app-1-db-prod'
 
-        BUILD_CONTEXT            = './nginx-flask-mysql/db'
-        TASK_DEFINITION_TEMPLATE ='./nginx-flask-mysql/db/task-definition.json'
+        BUILD_CONTEXT             = './nginx-flask-mysql/db'
+        TASK_DEFINITION_TEMPLATE  = './nginx-flask-mysql/db/task-definition.json'
     }
 
     stages {
+
         stage('Checkout') {
-
             steps {
-
                 checkout scm
 
                 script {
-
-                    env.COMMIT_ID =
-                        sh(
-                            script: 'git rev-parse --short HEAD',
-                            returnStdout: true
-                        ).trim()
+                    env.COMMIT_ID = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
 
                     echo "Commit ID: ${env.COMMIT_ID}"
                 }
@@ -38,20 +34,21 @@ pipeline {
         }
 
         stage('Build DB Image - DEV') {
-
             steps {
-
                 script {
 
-                    def imageTag ="DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
+                    def imageTag = "DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
 
                     env.DEV_IMAGE_TAG = imageTag
 
-                    def imageUri ="${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
+                    def imageUri =
+                        "${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
 
-                    echo "Building DB Image"
+                    echo "============================================================"
+                    echo "Building DB Image - DEV"
                     echo "Image: ${imageUri}"
-                    
+                    echo "============================================================"
+
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
                         "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
@@ -67,12 +64,11 @@ pipeline {
         }
 
         stage('Push DB Image - DEV') {
-
             steps {
-
                 script {
 
-                    def imageUri ="${env.ECR_REGISTRY}/${env.DEV_REPO}:${env.DEV_IMAGE_TAG}"
+                    def imageUri =
+                        "${env.ECR_REGISTRY}/${env.DEV_REPO}:${env.DEV_IMAGE_TAG}"
 
                     echo "============================================================"
                     echo "Pushing DEV DB Image"
@@ -91,9 +87,7 @@ pipeline {
         }
 
         stage('Deploy DB - DEV') {
-
             steps {
-
                 script {
 
                     deployDB(
@@ -105,149 +99,118 @@ pipeline {
             }
         }
 
-    //     stage('Promote DB - DEV to QA') {
+        /*
+        stage('Promote DB Image - QA') {
+            steps {
+                script {
 
-    //         steps {
+                    env.QA_IMAGE_TAG = promoteImage(
+                        env.DEV_REPO,
+                        env.QA_REPO,
+                        env.DEV_IMAGE_TAG,
+                        'QA'
+                    )
+                }
+            }
+        }
 
-    //             script {
+        stage('Deploy DB - QA') {
+            steps {
+                script {
 
-    //                 promoteImage(
-    //                     env.DEV_REPO,
-    //                     env.QA_REPO,
-    //                     env.DEV_IMAGE_TAG,
-    //                     'QA'
-    //                 )
+                    deployDB(
+                        'qa',
+                        env.QA_REPO,
+                        env.QA_IMAGE_TAG
+                    )
+                }
+            }
+        }
+        */
 
-    //                 env.QA_IMAGE_TAG ="QA-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-    //             }
-    //         }
-    //     }
+        /*
+        stage('Promote DB Image - UAT') {
+            steps {
+                script {
 
-    //     stage('Deploy DB - QA') {
+                    env.UAT_IMAGE_TAG = promoteImage(
+                        env.QA_REPO,
+                        env.UAT_REPO,
+                        env.QA_IMAGE_TAG,
+                        'UAT'
+                    )
+                }
+            }
+        }
 
-    //         steps {
+        stage('Deploy DB - UAT') {
+            steps {
+                script {
 
-    //             script {
+                    deployDB(
+                        'uat',
+                        env.UAT_REPO,
+                        env.UAT_IMAGE_TAG
+                    )
+                }
+            }
+        }
+        */
+       /*
+        stage('Promote DB Image - PROD') {
+            steps {
+                script {
 
-    //                 deployDB(
-    //                     'qa',
-    //                     env.QA_REPO,
-    //                     env.QA_IMAGE_TAG
-    //                 )
-    //             }
-    //         }
-    //     }
+                    env.PROD_IMAGE_TAG = promoteImage(
+                        env.UAT_REPO,
+                        env.PROD_REPO,
+                        env.UAT_IMAGE_TAG,
+                        'PROD'
+                    )
+                }
+            }
+        }
 
-    //     stage('Promote DB - DEV to UAT') {
+        stage('Deploy DB - PROD') {
+            steps {
+                script {
 
-    //         steps {
+                    deployDB(
+                        'prod',
+                        env.PROD_REPO,
+                        env.PROD_IMAGE_TAG
+                    )
+                }
+            }
+        }
+        */
 
-    //             script {
-
-    //                 promoteImage(
-    //                     env.DEV_REPO,
-    //                     env.UAT_REPO,
-    //                     env.DEV_IMAGE_TAG,
-    //                     'UAT'
-    //                 )
-
-    //                 env.UAT_IMAGE_TAG ="UAT-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-    //             }
-    //         }
-    //     }
-
-    //     stage('Deploy DB - UAT') {
-
-    //         steps {
-
-    //             script {
-
-    //                 deployDB(
-    //                     'uat',
-    //                     env.UAT_REPO,
-    //                     env.UAT_IMAGE_TAG
-    //                 )
-    //             }
-    //         }
-    //     }
-
-    //     stage('Promote DB - DEV to PROD') {
-
-    //         steps {
-
-    //             script {
-
-    //                 promoteImage(
-    //                     env.DEV_REPO,
-    //                     env.PROD_REPO,
-    //                     env.DEV_IMAGE_TAG,
-    //                     'PROD'
-    //                 )
-
-    //                 env.PROD_IMAGE_TAG ="PROD-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-    //             }
-    //         }
-    //     }
-
-    //     stage('Production Approval') {
-
-    //         steps {
-
-    //             input(
-    //                 message: 'DEV, QA and UAT DB deployment completed. Deploy DB to PROD?',
-    //                 ok: 'Deploy to PROD'
-    //             )
-    //         }
-    //     }
-
-    //     stage('Deploy DB - PROD') {
-
-    //         steps {
-
-    //             script {
-
-    //                 deployDB(
-    //                     'prod',
-    //                     env.PROD_REPO,
-    //                     env.PROD_IMAGE_TAG
-    //                 )
-    //             }
-    //         }
-    //     }
-    // }
+    }   
 
     post {
 
-        always {
-
-            echo 'Cleaning Jenkins workspace...'
-
-            cleanWs()
-        }
-
         success {
-
-            echo '''
-============================================================
-DB ECS CI/CD completed successfully.
-
-DEV  → QA → UAT → PROD
-============================================================
-'''
+            echo "============================================================"
+            echo "DB PIPELINE COMPLETED SUCCESSFULLY"
+            echo "============================================================"
         }
 
         failure {
+            echo "============================================================"
+            echo "DB PIPELINE FAILED"
+            echo "============================================================"
+        }
 
-            echo '''
-============================================================
-DB ECS CI/CD FAILED.
-
-Check the Jenkins console output.
-============================================================
-'''
+        always {
+            echo "DB pipeline execution finished."
         }
     }
 }
+
+
+// ====================================================================
+// FUNCTION: promoteImage
+// ====================================================================
 
 def promoteImage(
     String sourceRepo,
@@ -265,11 +228,10 @@ def promoteImage(
     def targetImage =
         "${env.ECR_REGISTRY}/${targetRepo}:${targetTag}"
 
-
     echo "============================================================"
-    echo "Promoting DB image"
-    echo "SOURCE : ${sourceImage}"
-    echo "TARGET : ${targetImage}"
+    echo "Promoting Image"
+    echo "Source Image : ${sourceImage}"
+    echo "Target Image : ${targetImage}"
     echo "============================================================"
 
     withCredentials([
@@ -282,9 +244,10 @@ def promoteImage(
         sh """
             set -e
 
-            echo "AWS Identity:"
+            echo "Checking AWS identity..."
             aws sts get-caller-identity
-            echo "Logging into ECR..."
+
+            echo "Logging in to ECR..."
 
             aws ecr get-login-password \
                 --region ${env.AWS_REGION} \
@@ -292,30 +255,27 @@ def promoteImage(
                     --username AWS \
                     --password-stdin ${env.ECR_REGISTRY}
 
-
-            echo "Pulling DEV DB image..."
-
+            echo "Pulling source image..."
             docker pull ${sourceImage}
 
+            echo "Tagging image..."
+            docker tag ${sourceImage} ${targetImage}
 
-            echo "Retagging DB image..."
-
-            docker tag \
-                ${sourceImage} \
-                ${targetImage}
-
-
-            echo "Pushing promoted DB image..."
-
+            echo "Pushing target image..."
             docker push ${targetImage}
 
-
-            echo "Promotion completed:"
-
-            echo "${targetImage}"
+            echo "Image promotion completed."
+            echo "Target image: ${targetImage}"
         """
     }
+
+    return targetTag
 }
+
+
+// ====================================================================
+// FUNCTION: deployDB
+// ====================================================================
 
 def deployDB(
     String environment,
@@ -329,13 +289,13 @@ def deployDB(
     def taskDefinitionFile =
         "new-db-task-definition-${environment}.json"
 
-
     echo "============================================================"
     echo "Deploying DB"
     echo "Environment : ${environment}"
-    echo "Image       : ${imageUri}"
+    echo "Repository  : ${repository}"
+    echo "Image Tag   : ${imageTag}"
+    echo "Image URI   : ${imageUri}"
     echo "============================================================"
-
 
     withCredentials([
         [
@@ -347,29 +307,44 @@ def deployDB(
         sh """
             set -e
 
-            echo "AWS Identity:"
+            echo "Checking AWS identity..."
             aws sts get-caller-identity
+
             echo "Creating DB task definition for ${environment}..."
 
             python3 - <<PYTHON
 
 import json
 
+# ------------------------------------------------------------
+# Read existing task definition template
+# ------------------------------------------------------------
+
 with open("${env.TASK_DEFINITION_TEMPLATE}") as f:
     task_definition = json.load(f)
 
+
+# ------------------------------------------------------------
 # Set environment-specific task definition family
-task_definition["family"] = \"app-1-${environment}-db"
+# ------------------------------------------------------------
 
+task_definition["family"] = "app-1-${environment}-db"
+
+
+# ------------------------------------------------------------
 # Update DB container image
-for container in task_definition["containerDefinitions"]:
-    if container["name"] == "db":
-        container["image"] = \
-            "${imageUri}"
+# ------------------------------------------------------------
 
-# Remove fields returned by
-# describe-task-definition which cannot
-# be passed back during registration.
+for container in task_definition["containerDefinitions"]:
+
+    if container["name"] == "db":
+
+        container["image"] = "${imageUri}"
+
+
+# ------------------------------------------------------------
+# Remove AWS-generated/read-only fields
+# ------------------------------------------------------------
 
 remove_fields = [
     "taskDefinitionArn",
@@ -380,13 +355,19 @@ remove_fields = [
     "registeredAt",
     "registeredBy"
 ]
+
 for field in remove_fields:
+
     task_definition.pop(
         field,
         None
     )
 
+
+# ------------------------------------------------------------
 # Save new task definition
+# ------------------------------------------------------------
+
 with open("${taskDefinitionFile}", "w") as f:
 
     json.dump(
@@ -394,38 +375,51 @@ with open("${taskDefinitionFile}", "w") as f:
         f,
         indent=2
     )
+
+
 print("Task definition created:")
 print("${taskDefinitionFile}")
+
 print("DB Image:")
 print("${imageUri}")
 
 PYTHON
 
 
+            # --------------------------------------------------------
+            # Register ECS task definition
+            # --------------------------------------------------------
+
             echo "Registering ECS DB task definition..."
 
-            REVISION=\$(aws ecs register-task-definition \
+            REVISION=\\$(aws ecs register-task-definition \
                 --cli-input-json file://${taskDefinitionFile} \
                 --region ${env.AWS_REGION} \
                 --query 'taskDefinition.revision' \
                 --output text)
 
+            echo "Registered revision: \\$REVISION"
 
-            echo "Registered revision: \$REVISION"
+
+            # --------------------------------------------------------
+            # Update ECS DB service
+            # --------------------------------------------------------
 
             echo "Updating ECS DB service..."
-
 
             aws ecs update-service \
                 --cluster app-1-${environment}-cluster \
                 --service app-1-${environment}-db-service \
-                --task-definition app-1-${environment}-db:\$REVISION \
+                --task-definition app-1-${environment}-db:\\$REVISION \
                 --force-new-deployment \
                 --region ${env.AWS_REGION}
 
 
-            echo "Waiting for ECS DB service to become stable..."
+            # --------------------------------------------------------
+            # Wait for ECS service
+            # --------------------------------------------------------
 
+            echo "Waiting for ECS DB service to become stable..."
 
             aws ecs wait services-stable \
                 --cluster app-1-${environment}-cluster \
@@ -434,9 +428,12 @@ PYTHON
 
 
             echo "============================================================"
-            echo "DB ${environment} deployment completed."
-            echo "Image: ${imageUri}"
+            echo "DB deployment completed successfully."
+            echo "Environment : ${environment}"
+            echo "Task Definition : app-1-${environment}-db:\\$REVISION"
+            echo "Image : ${imageUri}"
             echo "============================================================"
+
         """
     }
 }
