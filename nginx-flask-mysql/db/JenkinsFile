@@ -7,7 +7,7 @@ pipeline {
         ECR_REGISTRY   = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         AWS_CRED       = 'AWS'
 
-        DEV_REPO  = 'app-1-db-dev'
+        DEV_REPO  = 'app-1-dev-db'
         // QA_REPO   = 'app-1-db-qa'
         // UAT_REPO  = 'app-1-db-uat'
         // PROD_REPO = 'app-1-db-prod'
