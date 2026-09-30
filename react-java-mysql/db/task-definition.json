@@ -1,9 +1,8 @@
-
 {
   "containerDefinitions": [
     {
       "name": "db",
-      "image": "mysql:8.0",
+      "image": "552940445807.dkr.ecr.us-east-1.amazonaws.com/app-3-db-dev:DEV-9325da8-1",
       "cpu": 0,
       "portMappings": [
         {
@@ -15,22 +14,31 @@
       ],
       "essential": true,
       "environment": [
-  {
-    "name": "MYSQL_DATABASE",
-    "value": "example"
-  },
-  {
-    "name": "MYSQL_ROOT_PASSWORD",
-    "value": "rootpassword"
-  }
-],
-      "mountPoints": [],
-      "volumesFrom": [],
+        {
+          "name": "MYSQL_DATABASE",
+          "value": "example"
+        },
+        {
+          "name": "MYSQL_ROOT_PASSWORD",
+          "value": "rootpassword"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/app-3-dev-db",
+          "awslogs-create-group": "true",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        },
+        "secretOptions": []
+      },
       "systemControls": []
     }
   ],
   "family": "app-3-dev-db",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/app-3-ecs-execution-role",
+  "taskRoleArn": "arn:aws:iam::552940445807:role/app-3-ecs-task-role",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
