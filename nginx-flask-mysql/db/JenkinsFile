@@ -1,49 +1,23 @@
 
 pipeline {
-
     agent any
-
     environment {
 
         AWS_REGION     = 'us-east-1'
         AWS_ACCOUNT_ID = '552940445807'
-
-        ECR_REGISTRY =
-            "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-
-        AWS_CRED = 'AWS'
-
-        // ============================================================
-        // ECR REPOSITORIES
-        // ============================================================
+        ECR_REGISTRY   =  "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        AWS_CRED       = 'AWS'
 
         DEV_REPO  = 'app-1-db-dev'
-        QA_REPO   = 'app-1-db-qa'
-        UAT_REPO  = 'app-1-db-uat'
-        PROD_REPO = 'app-1-db-prod'
+        // QA_REPO   = 'app-1-db-qa'
+        // UAT_REPO  = 'app-1-db-uat'
+        // PROD_REPO = 'app-1-db-prod'
 
-        // ============================================================
-        // DOCKER BUILD LOCATION
-        // ============================================================
-
-        BUILD_CONTEXT =
-            './nginx-flask-mysql/db'
-
-        // ============================================================
-        // ECS TASK DEFINITION TEMPLATE
-        // ============================================================
-
-        TASK_DEFINITION_TEMPLATE =
-            './nginx-flask-mysql/db/task-definition.json'
+        BUILD_CONTEXT            = './nginx-flask-mysql/db'
+        TASK_DEFINITION_TEMPLATE ='./nginx-flask-mysql/db/task-definition.json'
     }
 
-
     stages {
-
-        // ============================================================
-        // 1. CHECKOUT
-        // ============================================================
-
         stage('Checkout') {
 
             steps {
@@ -63,30 +37,21 @@ pipeline {
             }
         }
 
-
-        // ============================================================
-        // 2. BUILD DB IMAGE ONLY IN DEV
-        // ============================================================
-
         stage('Build DB Image - DEV') {
 
             steps {
 
                 script {
 
-                    def imageTag =
-                        "DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
+                    def imageTag ="DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
 
                     env.DEV_IMAGE_TAG = imageTag
 
-                    def imageUri =
-                        "${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
+                    def imageUri ="${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
 
-                    echo "============================================================"
                     echo "Building DB Image"
                     echo "Image: ${imageUri}"
-                    echo "============================================================"
-
+                    
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
                         "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
@@ -101,19 +66,13 @@ pipeline {
             }
         }
 
-
-        // ============================================================
-        // 3. PUSH DB IMAGE - DEV
-        // ============================================================
-
         stage('Push DB Image - DEV') {
 
             steps {
 
                 script {
 
-                    def imageUri =
-                        "${env.ECR_REGISTRY}/${env.DEV_REPO}:${env.DEV_IMAGE_TAG}"
+                    def imageUri ="${env.ECR_REGISTRY}/${env.DEV_REPO}:${env.DEV_IMAGE_TAG}"
 
                     echo "============================================================"
                     echo "Pushing DEV DB Image"
@@ -131,11 +90,6 @@ pipeline {
             }
         }
 
-
-        // ============================================================
-        // 4. DEPLOY DB - DEV
-        // ============================================================
-
         stage('Deploy DB - DEV') {
 
             steps {
@@ -151,159 +105,116 @@ pipeline {
             }
         }
 
+    //     stage('Promote DB - DEV to QA') {
 
-        // ============================================================
-        // 5. PROMOTE DEV → QA
-        // ============================================================
+    //         steps {
 
-        stage('Promote DB - DEV to QA') {
+    //             script {
 
-            steps {
+    //                 promoteImage(
+    //                     env.DEV_REPO,
+    //                     env.QA_REPO,
+    //                     env.DEV_IMAGE_TAG,
+    //                     'QA'
+    //                 )
 
-                script {
+    //                 env.QA_IMAGE_TAG ="QA-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
+    //             }
+    //         }
+    //     }
 
-                    promoteImage(
-                        env.DEV_REPO,
-                        env.QA_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'QA'
-                    )
+    //     stage('Deploy DB - QA') {
 
-                    env.QA_IMAGE_TAG =
-                        "QA-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-                }
-            }
-        }
+    //         steps {
 
+    //             script {
 
-        // ============================================================
-        // 6. DEPLOY DB - QA
-        // ============================================================
+    //                 deployDB(
+    //                     'qa',
+    //                     env.QA_REPO,
+    //                     env.QA_IMAGE_TAG
+    //                 )
+    //             }
+    //         }
+    //     }
 
-        stage('Deploy DB - QA') {
+    //     stage('Promote DB - DEV to UAT') {
 
-            steps {
+    //         steps {
 
-                script {
+    //             script {
 
-                    deployDB(
-                        'qa',
-                        env.QA_REPO,
-                        env.QA_IMAGE_TAG
-                    )
-                }
-            }
-        }
+    //                 promoteImage(
+    //                     env.DEV_REPO,
+    //                     env.UAT_REPO,
+    //                     env.DEV_IMAGE_TAG,
+    //                     'UAT'
+    //                 )
 
+    //                 env.UAT_IMAGE_TAG ="UAT-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
+    //             }
+    //         }
+    //     }
 
-        // ============================================================
-        // 7. PROMOTE DEV → UAT
-        // ============================================================
+    //     stage('Deploy DB - UAT') {
 
-        stage('Promote DB - DEV to UAT') {
+    //         steps {
 
-            steps {
+    //             script {
 
-                script {
+    //                 deployDB(
+    //                     'uat',
+    //                     env.UAT_REPO,
+    //                     env.UAT_IMAGE_TAG
+    //                 )
+    //             }
+    //         }
+    //     }
 
-                    promoteImage(
-                        env.DEV_REPO,
-                        env.UAT_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'UAT'
-                    )
+    //     stage('Promote DB - DEV to PROD') {
 
-                    env.UAT_IMAGE_TAG =
-                        "UAT-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-                }
-            }
-        }
+    //         steps {
 
+    //             script {
 
-        // ============================================================
-        // 8. DEPLOY DB - UAT
-        // ============================================================
+    //                 promoteImage(
+    //                     env.DEV_REPO,
+    //                     env.PROD_REPO,
+    //                     env.DEV_IMAGE_TAG,
+    //                     'PROD'
+    //                 )
 
-        stage('Deploy DB - UAT') {
+    //                 env.PROD_IMAGE_TAG ="PROD-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
+    //             }
+    //         }
+    //     }
 
-            steps {
+    //     stage('Production Approval') {
 
-                script {
+    //         steps {
 
-                    deployDB(
-                        'uat',
-                        env.UAT_REPO,
-                        env.UAT_IMAGE_TAG
-                    )
-                }
-            }
-        }
+    //             input(
+    //                 message: 'DEV, QA and UAT DB deployment completed. Deploy DB to PROD?',
+    //                 ok: 'Deploy to PROD'
+    //             )
+    //         }
+    //     }
 
+    //     stage('Deploy DB - PROD') {
 
-        // ============================================================
-        // 9. MANUAL PRODUCTION APPROVAL
-        // ============================================================
+    //         steps {
 
-        stage('Production Approval') {
+    //             script {
 
-            steps {
-
-                input(
-                    message: 'DEV, QA and UAT DB deployment completed. Deploy DB to PROD?',
-                    ok: 'Deploy to PROD'
-                )
-            }
-        }
-
-
-        // ============================================================
-        // 10. PROMOTE DEV → PROD
-        // ============================================================
-
-        stage('Promote DB - DEV to PROD') {
-
-            steps {
-
-                script {
-
-                    promoteImage(
-                        env.DEV_REPO,
-                        env.PROD_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'PROD'
-                    )
-
-                    env.PROD_IMAGE_TAG =
-                        "PROD-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-                }
-            }
-        }
-
-
-        // ============================================================
-        // 11. DEPLOY DB - PROD
-        // ============================================================
-
-        stage('Deploy DB - PROD') {
-
-            steps {
-
-                script {
-
-                    deployDB(
-                        'prod',
-                        env.PROD_REPO,
-                        env.PROD_IMAGE_TAG
-                    )
-                }
-            }
-        }
-    }
-
-
-    // ================================================================
-    // POST ACTIONS
-    // ================================================================
+    //                 deployDB(
+    //                     'prod',
+    //                     env.PROD_REPO,
+    //                     env.PROD_IMAGE_TAG
+    //                 )
+    //             }
+    //         }
+    //     }
+    // }
 
     post {
 
@@ -321,9 +232,6 @@ pipeline {
 DB ECS CI/CD completed successfully.
 
 DEV  → QA → UAT → PROD
-
-DB image was built only once in DEV.
-The same image was promoted to QA, UAT and PROD.
 ============================================================
 '''
         }
@@ -340,11 +248,6 @@ Check the Jenkins console output.
         }
     }
 }
-
-
-// ====================================================================
-// FUNCTION: PROMOTE IMAGE
-// ====================================================================
 
 def promoteImage(
     String sourceRepo,
@@ -369,7 +272,6 @@ def promoteImage(
     echo "TARGET : ${targetImage}"
     echo "============================================================"
 
-
     withCredentials([
         [
             $class: 'AmazonWebServicesCredentialsBinding',
@@ -381,10 +283,7 @@ def promoteImage(
             set -e
 
             echo "AWS Identity:"
-
             aws sts get-caller-identity
-
-
             echo "Logging into ECR..."
 
             aws ecr get-login-password \
@@ -418,11 +317,6 @@ def promoteImage(
     }
 }
 
-
-// ====================================================================
-// FUNCTION: DEPLOY DB TO ECS
-// ====================================================================
-
 def deployDB(
     String environment,
     String repository,
@@ -454,71 +348,45 @@ def deployDB(
             set -e
 
             echo "AWS Identity:"
-
             aws sts get-caller-identity
-
-
             echo "Creating DB task definition for ${environment}..."
-
 
             python3 - <<PYTHON
 
 import json
 
-
 with open("${env.TASK_DEFINITION_TEMPLATE}") as f:
-
     task_definition = json.load(f)
 
-
 # Set environment-specific task definition family
-
-task_definition["family"] = \
-    "app-1-${environment}-db"
-
+task_definition["family"] = \"app-1-${environment}-db"
 
 # Update DB container image
-
 for container in task_definition["containerDefinitions"]:
-
     if container["name"] == "db":
-
         container["image"] = \
             "${imageUri}"
-
 
 # Remove fields returned by
 # describe-task-definition which cannot
 # be passed back during registration.
 
 remove_fields = [
-
     "taskDefinitionArn",
-
     "revision",
-
     "status",
-
     "requiresAttributes",
-
     "compatibilities",
-
     "registeredAt",
-
     "registeredBy"
 ]
-
-
 for field in remove_fields:
-
     task_definition.pop(
         field,
         None
     )
 
-
 # Save new task definition
-
 with open("${taskDefinitionFile}", "w") as f:
 
     json.dump(
@@ -526,22 +394,15 @@ with open("${taskDefinitionFile}", "w") as f:
         f,
         indent=2
     )
-
-
 print("Task definition created:")
-
 print("${taskDefinitionFile}")
-
-
 print("DB Image:")
-
 print("${imageUri}")
 
 PYTHON
 
 
             echo "Registering ECS DB task definition..."
-
 
             REVISION=\$(aws ecs register-task-definition \
                 --cli-input-json file://${taskDefinitionFile} \
@@ -551,7 +412,6 @@ PYTHON
 
 
             echo "Registered revision: \$REVISION"
-
 
             echo "Updating ECS DB service..."
 
@@ -580,4 +440,3 @@ PYTHON
         """
     }
 }
-
