@@ -9,11 +9,11 @@ pipeline {
 
         DEV_REPO  = 'app-1-db-dev'
         // QA_REPO   = 'app-1-db-qa'
-        // UAT_REPO  = 'app-1-db-uat'
+        // UAT_REPO   = 'app-1-db-uat'
         // PROD_REPO = 'app-1-db-prod'
 
-        BUILD_CONTEXT             = './nginx-flask-mysql/db'
-        TASK_DEFINITION_TEMPLATE  = './nginx-flask-mysql/db/task-definition.json'
+        BUILD_CONTEXT            = './nginx-flask-mysql/db'
+        TASK_DEFINITION_TEMPLATE = './nginx-flask-mysql/db/task-definition.json'
     }
 
     stages {
@@ -36,7 +36,6 @@ pipeline {
         stage('Build DB Image - DEV') {
             steps {
                 script {
-
                     def imageTag = "DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
 
                     env.DEV_IMAGE_TAG = imageTag
@@ -44,16 +43,13 @@ pipeline {
                     def imageUri =
                         "${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
 
-                    echo "============================================================"
-                    echo "Building DB Image - DEV"
+                    echo "Building DB Image"
                     echo "Image: ${imageUri}"
-                    echo "============================================================"
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
                         "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
                     ) {
-
                         docker.build(
                             imageUri,
                             env.BUILD_CONTEXT
@@ -66,20 +62,16 @@ pipeline {
         stage('Push DB Image - DEV') {
             steps {
                 script {
-
                     def imageUri =
                         "${env.ECR_REGISTRY}/${env.DEV_REPO}:${env.DEV_IMAGE_TAG}"
 
-                    echo "============================================================"
                     echo "Pushing DEV DB Image"
                     echo "Image: ${imageUri}"
-                    echo "============================================================"
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
                         "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
                     ) {
-
                         docker.image(imageUri).push()
                     }
                 }
@@ -89,7 +81,6 @@ pipeline {
         stage('Deploy DB - DEV') {
             steps {
                 script {
-
                     deployDB(
                         'dev',
                         env.DEV_REPO,
@@ -103,7 +94,6 @@ pipeline {
         stage('Promote DB Image - QA') {
             steps {
                 script {
-
                     env.QA_IMAGE_TAG = promoteImage(
                         env.DEV_REPO,
                         env.QA_REPO,
@@ -117,7 +107,6 @@ pipeline {
         stage('Deploy DB - QA') {
             steps {
                 script {
-
                     deployDB(
                         'qa',
                         env.QA_REPO,
@@ -132,7 +121,6 @@ pipeline {
         stage('Promote DB Image - UAT') {
             steps {
                 script {
-
                     env.UAT_IMAGE_TAG = promoteImage(
                         env.QA_REPO,
                         env.UAT_REPO,
@@ -146,7 +134,6 @@ pipeline {
         stage('Deploy DB - UAT') {
             steps {
                 script {
-
                     deployDB(
                         'uat',
                         env.UAT_REPO,
@@ -156,11 +143,11 @@ pipeline {
             }
         }
         */
-       /*
+
+        /*
         stage('Promote DB Image - PROD') {
             steps {
                 script {
-
                     env.PROD_IMAGE_TAG = promoteImage(
                         env.UAT_REPO,
                         env.PROD_REPO,
@@ -174,7 +161,6 @@ pipeline {
         stage('Deploy DB - PROD') {
             steps {
                 script {
-
                     deployDB(
                         'prod',
                         env.PROD_REPO,
@@ -185,20 +171,15 @@ pipeline {
         }
         */
 
-    }   
+    }
 
     post {
-
         success {
-            echo "============================================================"
             echo "DB PIPELINE COMPLETED SUCCESSFULLY"
-            echo "============================================================"
         }
 
         failure {
-            echo "============================================================"
             echo "DB PIPELINE FAILED"
-            echo "============================================================"
         }
 
         always {
@@ -207,18 +188,12 @@ pipeline {
     }
 }
 
-
-// ====================================================================
-// FUNCTION: promoteImage
-// ====================================================================
-
 def promoteImage(
     String sourceRepo,
     String targetRepo,
     String sourceTag,
     String targetEnvironment
 ) {
-
     def sourceImage =
         "${env.ECR_REGISTRY}/${sourceRepo}:${sourceTag}"
 
@@ -228,11 +203,8 @@ def promoteImage(
     def targetImage =
         "${env.ECR_REGISTRY}/${targetRepo}:${targetTag}"
 
-    echo "============================================================"
-    echo "Promoting Image"
-    echo "Source Image : ${sourceImage}"
-    echo "Target Image : ${targetImage}"
-    echo "============================================================"
+    echo "Source Image: ${sourceImage}"
+    echo "Target Image: ${targetImage}"
 
     withCredentials([
         [
@@ -240,14 +212,10 @@ def promoteImage(
             credentialsId: "${env.AWS_CRED}"
         ]
     ]) {
-
         sh """
             set -e
 
-            echo "Checking AWS identity..."
             aws sts get-caller-identity
-
-            echo "Logging in to ECR..."
 
             aws ecr get-login-password \
                 --region ${env.AWS_REGION} \
@@ -255,13 +223,10 @@ def promoteImage(
                     --username AWS \
                     --password-stdin ${env.ECR_REGISTRY}
 
-            echo "Pulling source image..."
             docker pull ${sourceImage}
 
-            echo "Tagging image..."
             docker tag ${sourceImage} ${targetImage}
 
-            echo "Pushing target image..."
             docker push ${targetImage}
 
             echo "Image promotion completed."
@@ -272,30 +237,21 @@ def promoteImage(
     return targetTag
 }
 
-
-// ====================================================================
-// FUNCTION: deployDB
-// ====================================================================
-
 def deployDB(
     String environment,
     String repository,
     String imageTag
 ) {
-
     def imageUri =
         "${env.ECR_REGISTRY}/${repository}:${imageTag}"
 
     def taskDefinitionFile =
         "new-db-task-definition-${environment}.json"
 
-    echo "============================================================"
-    echo "Deploying DB"
-    echo "Environment : ${environment}"
-    echo "Repository  : ${repository}"
-    echo "Image Tag   : ${imageTag}"
-    echo "Image URI   : ${imageUri}"
-    echo "============================================================"
+    echo "Environment: ${environment}"
+    echo "Repository: ${repository}"
+    echo "Image Tag: ${imageTag}"
+    echo "Image URI: ${imageUri}"
 
     withCredentials([
         [
@@ -303,23 +259,27 @@ def deployDB(
             credentialsId: "${env.AWS_CRED}"
         ]
     ]) {
-
         sh """
             set -e
 
-            echo "Checking AWS identity..."
             aws sts get-caller-identity
 
             echo "Creating DB task definition for ${environment}..."
 
-            python3 - <<PYTHON
+            export TASK_DEFINITION_TEMPLATE="${env.TASK_DEFINITION_TEMPLATE}"
+            export TASK_DEFINITION_FILE="${taskDefinitionFile}"
+            export IMAGE_URI="${imageUri}"
+            export DEPLOY_ENV="${environment}"
+
+            python3 - <<'PYTHON'
 
 import json
+import os
 
-task_definition_file = "${taskDefinitionFile}"
-task_definition_template = "${env.TASK_DEFINITION_TEMPLATE}"
-image_uri = "${imageUri}"
-environment = "${environment}"
+task_definition_template = os.environ["TASK_DEFINITION_TEMPLATE"]
+task_definition_file = os.environ["TASK_DEFINITION_FILE"]
+image_uri = os.environ["IMAGE_URI"]
+environment = os.environ["DEPLOY_ENV"]
 
 with open(task_definition_template) as f:
     task_definition = json.load(f)
@@ -344,7 +304,11 @@ for field in remove_fields:
     task_definition.pop(field, None)
 
 with open(task_definition_file, "w") as f:
-    json.dump(task_definition, f, indent=2)
+    json.dump(
+        task_definition,
+        f,
+        indent=2
+    )
 
 print("Task definition created:")
 print(task_definition_file)
@@ -371,8 +335,7 @@ PYTHON
                 --service app-1-${environment}-db-service \
                 --task-definition app-1-${environment}-db:\\$REVISION \
                 --force-new-deployment \
-                --region ${env.AWS_REGION
-
+                --region ${env.AWS_REGION}
 
             echo "Waiting for ECS DB service to become stable..."
 
@@ -381,14 +344,11 @@ PYTHON
                 --services app-1-${environment}-db-service \
                 --region ${env.AWS_REGION}
 
-
-            echo "============================================================"
             echo "DB deployment completed successfully."
-            echo "Environment : ${environment}"
-            echo "Task Definition : app-1-${environment}-db:\\$REVISION"
-            echo "Image : ${imageUri}"
-            echo "============================================================"
 
+            echo "Environment: ${environment}"
+            echo "Task Definition: app-1-${environment}-db:\\$REVISION"
+            echo "Image: ${imageUri}"
         """
     }
 }
