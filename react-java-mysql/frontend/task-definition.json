@@ -2,29 +2,38 @@
   "containerDefinitions": [
     {
       "name": "frontend",
-      "image": "nginx:1.13-alpine",
+      "image": "552940445807.dkr.ecr.us-east-1.amazonaws.com/app-3-frontend-dev@sha256:f9841d2aae2b7d00da5f901487a9ee644112c20d3bdb67104fabfd88e9d63d9e",
       "cpu": 0,
       "portMappings": [
         {
           "containerPort": 80,
           "hostPort": 80,
           "protocol": "tcp",
-          "name": "frontend"
+          "name": "frontend-80-tcp",
+          "appProtocol": "http"
         }
       ],
       "essential": true,
       "environment": [],
-      "mountPoints": [],
-      "volumesFrom": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/app-3-dev-frontend",
+          "awslogs-create-group": "true",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        },
+        "secretOptions": []
+      },
       "systemControls": []
     }
   ],
   "family": "app-3-dev-frontend",
-  "executionRoleArn": "arn:aws:iam::552940445807:role/app-3-ecs-execution-role",
+  "executionRoleArn": "arn:aws:iam::552940445807:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
   ],
-  "cpu": "256",
-  "memory": "512"
+  "cpu": "1024",
+  "memory": "3072"
 }
