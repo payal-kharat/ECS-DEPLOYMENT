@@ -9,7 +9,7 @@ pipeline {
 
         DEV_REPO  = 'app-1-db-dev'
         // QA_REPO   = 'app-1-db-qa'
-        // UAT_REPO   = 'app-1-db-uat'
+        // UAT_REPO  = 'app-1-db-uat'
         // PROD_REPO = 'app-1-db-prod'
 
         BUILD_CONTEXT            = './nginx-flask-mysql/db'
@@ -170,7 +170,6 @@ pipeline {
             }
         }
         */
-
     }
 
     post {
@@ -266,10 +265,10 @@ def deployDB(
 
             echo "Creating DB task definition for ${environment}..."
 
-            export TASK_DEFINITION_TEMPLATE="${env.TASK_DEFINITION_TEMPLATE}"
-            export TASK_DEFINITION_FILE="${taskDefinitionFile}"
-            export IMAGE_URI="${imageUri}"
-            export DEPLOY_ENV="${environment}"
+            export TASK_DEFINITION_TEMPLATE='${env.TASK_DEFINITION_TEMPLATE}'
+            export TASK_DEFINITION_FILE='${taskDefinitionFile}'
+            export IMAGE_URI='${imageUri}'
+            export DEPLOY_ENV='${environment}'
 
             python3 - <<'PYTHON'
 
