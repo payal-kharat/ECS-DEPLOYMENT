@@ -93,40 +93,40 @@ pipeline {
             }
         }
 
-        // stage('DEV - Push Image') {
+         stage('DEV - Push Image') {
 
-        //     steps {
+             steps {
 
-        //         script {
+                 script {
 
-        //             if (!env.DEV_IMAGE_URI?.trim()) {
+                     if (!env.DEV_IMAGE_URI?.trim()) {
 
-        //                 error(
-        //                     "DEV_IMAGE_URI is empty. " +
-        //                     "DEV image was not built successfully."
-        //                 )
-        //             }
+                         error(
+                             "DEV_IMAGE_URI is empty. " +
+                             "DEV image was not built successfully."
+                         )
+                     }
 
-        //             echo "======================================"
-        //             echo "PUSHING APP-3 DB IMAGE"
-        //             echo "DEV REPOSITORY = ${env.DEV_REPO}"
-        //             echo "IMAGE URI       = ${env.DEV_IMAGE_URI}"
-        //             echo "======================================"
+                      echo "======================================"
+                    echo "PUSHING APP-3 DB IMAGE"
+                    echo "DEV REPOSITORY = ${env.DEV_REPO}"
+                    echo "IMAGE URI       = ${env.DEV_IMAGE_URI}"
+                    echo "======================================"
 
-        //             docker.withRegistry(
-        //                 "https://${env.ECR_REGISTRY}",
-        //                 "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
-        //             ) {
+                     docker.withRegistry(
+                        "https://${env.ECR_REGISTRY}",
+                        "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
+                     ) {
 
-        //                 docker.image(
-        //                     env.DEV_IMAGE_URI
-        //                 ).push()
-        //             }
+                        docker.image(
+                            env.DEV_IMAGE_URI
+                         ).push()
+                    }
 
-        //             echo "APP-3 DB DEV image pushed successfully."
-        //         }
-        //     }
-        // }
+                     echo "APP-3 DB DEV image pushed successfully."
+                 }
+            }
+        }
 
         // stage('Deploy DB - DEV') {
 
