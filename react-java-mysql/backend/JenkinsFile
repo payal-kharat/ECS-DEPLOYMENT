@@ -9,28 +9,19 @@ pipeline {
         AWS_ACCOUNT_ID = '552940445807'
         AWS_CRED       = 'AWS'
 
-        ECR_REGISTRY =
-            "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        ECR_REGISTRY ="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-        DEV_REPO  = 'app-3-backend-dev'
-        QA_REPO   = 'app-3-backend-qa'
-        UAT_REPO  = 'app-3-backend-uat'
-        PROD_REPO = 'app-3-backend-prod'
+        DEV_REPO  = 'app-3-dev-backend'
+       // QA_REPO   = 'app-3-qa-backend'
+       // UAT_REPO  = 'app-3-uat-backend'
+       // PROD_REPO = 'app-3-prod-backend'
 
-        BUILD_CONTEXT =
-            './react-java-mysql/backend'
+        BUILD_CONTEXT ='./react-java-mysql/backend'
 
-        TASK_DEFINITION_TEMPLATE =
-            './react-java-mysql/backend/task-definition.json'
+        TASK_DEFINITION_TEMPLATE ='./react-java-mysql/backend/task-definition.json'
     }
 
     stages {
-
-        /*
-         * ============================================================
-         * CHECKOUT
-         * ============================================================
-         */
 
         stage('Checkout') {
 
@@ -52,13 +43,6 @@ pipeline {
                 }
             }
         }
-
-
-        /*
-         * ============================================================
-         * DEV - BUILD IMAGE
-         * ============================================================
-         */
 
         stage('DEV - Build Backend Image') {
 
@@ -100,13 +84,6 @@ pipeline {
             }
         }
 
-
-        /*
-         * ============================================================
-         * DEV - PUSH IMAGE
-         * ============================================================
-         */
-
         stage('DEV - Push Backend Image') {
 
             steps {
@@ -137,13 +114,6 @@ pipeline {
             }
         }
 
-
-        /*
-         * ============================================================
-         * DEPLOY DEV
-         * ============================================================
-         */
-
         stage('Deploy Backend - DEV') {
 
             steps {
@@ -159,181 +129,125 @@ pipeline {
             }
         }
 
+        // stage('Promote Backend - DEV to QA') {
 
-        /*
-         * ============================================================
-         * DEV -> QA PROMOTION
-         * ============================================================
-         */
+        // steps {
 
-        stage('Promote Backend - DEV to QA') {
+        // script {
 
-            steps {
+        // env.QA_IMAGE_TAG = promoteImage(
+        // env.DEV_REPO,
+        // env.QA_REPO,
+        // env.DEV_IMAGE_TAG,
+        // 'QA'
+        // )
 
-                script {
+        // env.IMAGE_URI =
+        // "${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
 
-                    env.QA_IMAGE_TAG = promoteImage(
-                        env.DEV_REPO,
-                        env.QA_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'QA'
-                    )
+        // echo "QA IMAGE URI = ${env.IMAGE_URI}"
+        // }
+        // }
+        // }
 
-                    env.IMAGE_URI =
-                        "${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
+        // stage('Deploy Backend - QA') {
 
-                    echo "QA IMAGE URI = ${env.IMAGE_URI}"
-                }
-            }
-        }
+        // steps {
 
+        // script {
 
-        /*
-         * ============================================================
-         * DEPLOY QA
-         * ============================================================
-         */
+        // deployBackend(
+        // 'qa',
+        // env.QA_REPO,
+        // env.QA_IMAGE_TAG
+        // )
+        // }
+        // }
+        // }
 
-        stage('Deploy Backend - QA') {
+        // stage('Promote Backend - DEV to UAT') {
 
-            steps {
+        // steps {
 
-                script {
+        // script {
 
-                    deployBackend(
-                        'qa',
-                        env.QA_REPO,
-                        env.QA_IMAGE_TAG
-                    )
-                }
-            }
-        }
+        // env.UAT_IMAGE_TAG = promoteImage(
+        // env.DEV_REPO,
+        // env.UAT_REPO,
+        // env.DEV_IMAGE_TAG,
+        // 'UAT'
+        // )
 
+        // env.IMAGE_URI =
+        // "${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
 
-        /*
-         * ============================================================
-         * DEV -> UAT PROMOTION
-         * ============================================================
-         */
+        // echo "UAT IMAGE URI = ${env.IMAGE_URI}"
+        // }
+        // }
+        // }
+        // stage('Deploy Backend - UAT') {
 
-        stage('Promote Backend - DEV to UAT') {
+        // steps {
 
-            steps {
+        // script {
 
-                script {
+        // deployBackend(
+        // 'uat',
+        // env.UAT_REPO,
+        // env.UAT_IMAGE_TAG
+        // )
+        // }
+        // }
+        // }
 
-                    env.UAT_IMAGE_TAG = promoteImage(
-                        env.DEV_REPO,
-                        env.UAT_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'UAT'
-                    )
+        // stage('Production Approval') {
 
-                    env.IMAGE_URI =
-                        "${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
+        // steps {
 
-                    echo "UAT IMAGE URI = ${env.IMAGE_URI}"
-                }
-            }
-        }
-
-
-        /*
-         * ============================================================
-         * DEPLOY UAT
-         * ============================================================
-         */
-
-        stage('Deploy Backend - UAT') {
-
-            steps {
-
-                script {
-
-                    deployBackend(
-                        'uat',
-                        env.UAT_REPO,
-                        env.UAT_IMAGE_TAG
-                    )
-                }
-            }
-        }
+        // input(
+        // message: 'UAT deployment completed. Deploy Backend to PROD?',
+        // ok: 'Deploy to PROD'
+        // )
+        // }
+        // }
 
 
-        /*
-         * ============================================================
-         * PRODUCTION APPROVAL
-         * ============================================================
-         */
+        // stage('Promote Backend - DEV to PROD') {
 
-        stage('Production Approval') {
+        // steps {
 
-            steps {
+        // script {
 
-                input(
-                    message: 'UAT deployment completed. Deploy Backend to PROD?',
-                    ok: 'Deploy to PROD'
-                )
-            }
-        }
+        // env.PROD_IMAGE_TAG = promoteImage(
+        // env.DEV_REPO,
+        // env.PROD_REPO,
+        // env.DEV_IMAGE_TAG,
+        // 'PROD'
+        // )
 
+        // env.IMAGE_URI =
+        // "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
 
-        /*
-         * ============================================================
-         * DEV -> PROD PROMOTION
-         * ============================================================
-         */
+        // echo "PROD IMAGE URI = ${env.IMAGE_URI}"
+        // }
+        // }
+        // }
 
-        stage('Promote Backend - DEV to PROD') {
+        // stage('Deploy Backend - PROD') {
 
-            steps {
+        // steps {
 
-                script {
+        // script {
 
-                    env.PROD_IMAGE_TAG = promoteImage(
-                        env.DEV_REPO,
-                        env.PROD_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'PROD'
-                    )
-
-                    env.IMAGE_URI =
-                        "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
-
-                    echo "PROD IMAGE URI = ${env.IMAGE_URI}"
-                }
-            }
-        }
-
-
-        /*
-         * ============================================================
-         * DEPLOY PROD
-         * ============================================================
-         */
-
-        stage('Deploy Backend - PROD') {
-
-            steps {
-
-                script {
-
-                    deployBackend(
-                        'prod',
-                        env.PROD_REPO,
-                        env.PROD_IMAGE_TAG
-                    )
-                }
-            }
-        }
+        // deployBackend(
+        // 'prod',
+        // env.PROD_REPO,
+        // env.PROD_IMAGE_TAG
+        // )
+        // }
+        // }
+        // }
     }
-
-
-    /*
-     * ================================================================
-     * POST ACTIONS
-     * ================================================================
-     */
 
     post {
 
@@ -361,30 +275,6 @@ pipeline {
         }
     }
 }
-
-
-/*
- * ====================================================================
- * FUNCTION: PROMOTE IMAGE
- * ====================================================================
- *
- * IMPORTANT:
- * The image is NOT rebuilt.
- *
- * DEV image:
- *
- * app-3-backend-dev:DEV-abc1234-25
- *
- * is pulled and retagged as:
- *
- * app-3-backend-qa:QA-abc1234-25
- *
- * app-3-backend-uat:UAT-abc1234-25
- *
- * app-3-backend-prod:PROD-abc1234-25
- *
- * ====================================================================
- */
 
 def promoteImage(
     String sourceRepo,
@@ -452,13 +342,6 @@ def promoteImage(
     return targetTag
 }
 
-
-/*
- * ====================================================================
- * FUNCTION: DEPLOY BACKEND
- * ====================================================================
- */
-
 def deployBackend(
     String environment,
     String repository,
@@ -490,12 +373,6 @@ def deployBackend(
     echo "SERVICE     = ${service}"
     echo "TASK FAMILY = ${taskFamily}"
     echo "======================================"
-
-    /*
-     * ------------------------------------------------------------
-     * CREATE ENVIRONMENT-SPECIFIC TASK DEFINITION
-     * ------------------------------------------------------------
-     */
 
     withCredentials([
         [$class: 'AmazonWebServicesCredentialsBinding',
@@ -569,12 +446,6 @@ PY
     }
 
 
-    /*
-     * ------------------------------------------------------------
-     * REGISTER TASK DEFINITION
-     * ------------------------------------------------------------
-     */
-
     def revision = sh(
         script: """
             set -e
@@ -598,13 +469,6 @@ PY
             "ECS returned invalid revision: '${revision}'"
         )
     }
-
-
-    /*
-     * ------------------------------------------------------------
-     * UPDATE ECS SERVICE
-     * ------------------------------------------------------------
-     */
 
     echo "Updating ECS service..."
 
@@ -636,4 +500,3 @@ PY
     echo "IMAGE = ${imageUri}"
     echo "======================================"
 }
-
