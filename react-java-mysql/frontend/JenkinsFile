@@ -17,9 +17,11 @@ pipeline {
         // UAT_REPO  = 'app-3-frontend-uat'
         // PROD_REPO = 'app-3-frontend-prod'
 
-        BUILD_CONTEXT ='./react-java-mysql/frontend'
+        BUILD_CONTEXT =
+            './react-java-mysql/frontend'
 
-        TASK_DEFINITION_TEMPLATE ='./react-java-mysql/frontend/task-definition.json'
+        TASK_DEFINITION_TEMPLATE =
+            './react-java-mysql/frontend/task-definition.json'
     }
 
     stages {
@@ -202,53 +204,53 @@ pipeline {
         //     }
         // }
 
-    //     stage('Production Approval') {
+        // stage('Production Approval') {
 
-    //         steps {
+        //     steps {
 
-    //             input(
-    //                 message: 'UAT deployment completed. Deploy Frontend to PROD?',
-    //                 ok: 'Deploy to PROD'
-    //             )
-    //         }
-    //     }
+        //         input(
+        //             message: 'UAT deployment completed. Deploy Frontend to PROD?',
+        //             ok: 'Deploy to PROD'
+        //         )
+        //     }
+        // }
 
-    //     stage('Promote Frontend - DEV to PROD') {
+        // stage('Promote Frontend - DEV to PROD') {
 
-    //         steps {
+        //     steps {
 
-    //             script {
+        //         script {
 
-    //                 env.PROD_IMAGE_TAG = promoteImage(
-    //                     env.DEV_REPO,
-    //                     env.PROD_REPO,
-    //                     env.DEV_IMAGE_TAG,
-    //                     'PROD'
-    //                 )
+        //             env.PROD_IMAGE_TAG = promoteImage(
+        //                 env.DEV_REPO,
+        //                 env.PROD_REPO,
+        //                 env.DEV_IMAGE_TAG,
+        //                 'PROD'
+        //             )
 
-    //                 env.IMAGE_URI =
-    //                     "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
+        //             env.IMAGE_URI =
+        //                 "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
 
-    //                 echo "PROD IMAGE URI = ${env.IMAGE_URI}"
-    //             }
-    //         }
-    //     }
+        //             echo "PROD IMAGE URI = ${env.IMAGE_URI}"
+        //         }
+        //     }
+        // }
 
-    //     stage('Deploy Frontend - PROD') {
+        // stage('Deploy Frontend - PROD') {
 
-    //         steps {
+        //     steps {
 
-    //             script {
+        //         script {
 
-    //                 deployFrontend(
-    //                     'prod',
-    //                     env.PROD_REPO,
-    //                     env.PROD_IMAGE_TAG
-    //                 )
-    //             }
-    //         }
-    //     }
-    // }
+        //             deployFrontend(
+        //                 'prod',
+        //                 env.PROD_REPO,
+        //                 env.PROD_IMAGE_TAG
+        //             )
+        //         }
+        //     }
+        // }
+    }
 
     post {
 
@@ -276,6 +278,7 @@ pipeline {
         }
     }
 }
+
 
 def promoteImage(
     String sourceRepo,
@@ -346,6 +349,7 @@ def promoteImage(
 
     return targetTag
 }
+
 
 def deployFrontend(
     String environment,
