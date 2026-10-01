@@ -304,7 +304,7 @@ def promoteImage(
 
     withCredentials([
         [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId: env.AWS_CRED]
+         credentialsId: AWS]
     ]) {
 
         sh """
