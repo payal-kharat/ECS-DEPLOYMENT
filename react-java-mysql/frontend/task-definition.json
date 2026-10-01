@@ -30,6 +30,7 @@
   ],
   "family": "app-3-dev-frontend",
   "executionRoleArn": "arn:aws:iam::552940445807:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::552940445807:role/app-3-dev-ecs-task-role",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
