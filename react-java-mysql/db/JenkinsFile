@@ -273,7 +273,7 @@ pipeline {
     //             }
     //         }
     //     }
-    // }
+    }
 
     post {
 
@@ -308,7 +308,6 @@ Check the Jenkins console output.
 '''
         }
     }
-}
 }
 def promoteImage(
     String sourceRepo,
@@ -564,5 +563,3 @@ PYTHON
         """
     }
 }
-
-
