@@ -304,7 +304,7 @@ def promoteImage(
 
     withCredentials([
         [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId: AWS]
+         credentialsId:${env.AWS_CRED}]
     ]) {
 
         sh """
@@ -376,7 +376,7 @@ def deployBackend(
 
     withCredentials([
         [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId: AWS]
+         credentialsId:${env.AWS_CRED}]
     ]) {
 
         sh """
