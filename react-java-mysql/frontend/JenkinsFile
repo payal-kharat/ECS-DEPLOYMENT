@@ -13,24 +13,16 @@ pipeline {
             "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
         DEV_REPO  = 'app-3-frontend-dev'
-        QA_REPO   = 'app-3-frontend-qa'
-        UAT_REPO  = 'app-3-frontend-uat'
-        PROD_REPO = 'app-3-frontend-prod'
+        // QA_REPO   = 'app-3-frontend-qa'
+        // UAT_REPO  = 'app-3-frontend-uat'
+        // PROD_REPO = 'app-3-frontend-prod'
 
-        BUILD_CONTEXT =
-            './react-java-mysql/frontend'
+        BUILD_CONTEXT ='./react-java-mysql/frontend'
 
-        TASK_DEFINITION_TEMPLATE =
-            './react-java-mysql/frontend/task-definition.json'
+        TASK_DEFINITION_TEMPLATE ='./react-java-mysql/frontend/task-definition.json'
     }
 
     stages {
-
-        /*
-         * ============================================================
-         * CHECKOUT
-         * ============================================================
-         */
 
         stage('Checkout') {
 
@@ -52,13 +44,6 @@ pipeline {
                 }
             }
         }
-
-
-        /*
-         * ============================================================
-         * DEV - BUILD FRONTEND IMAGE
-         * ============================================================
-         */
 
         stage('DEV - Build Frontend Image') {
 
@@ -100,13 +85,6 @@ pipeline {
             }
         }
 
-
-        /*
-         * ============================================================
-         * DEV - PUSH FRONTEND IMAGE
-         * ============================================================
-         */
-
         stage('DEV - Push Frontend Image') {
 
             steps {
@@ -137,13 +115,6 @@ pipeline {
             }
         }
 
-
-        /*
-         * ============================================================
-         * DEPLOY DEV
-         * ============================================================
-         */
-
         stage('Deploy Frontend - DEV') {
 
             steps {
@@ -159,181 +130,125 @@ pipeline {
             }
         }
 
+        // stage('Promote Frontend - DEV to QA') {
 
-        /*
-         * ============================================================
-         * DEV -> QA PROMOTION
-         * ============================================================
-         */
+        //     steps {
 
-        stage('Promote Frontend - DEV to QA') {
+        //         script {
 
-            steps {
+        //             env.QA_IMAGE_TAG = promoteImage(
+        //                 env.DEV_REPO,
+        //                 env.QA_REPO,
+        //                 env.DEV_IMAGE_TAG,
+        //                 'QA'
+        //             )
 
-                script {
+        //             env.IMAGE_URI =
+        //                 "${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
 
-                    env.QA_IMAGE_TAG = promoteImage(
-                        env.DEV_REPO,
-                        env.QA_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'QA'
-                    )
+        //             echo "QA IMAGE URI = ${env.IMAGE_URI}"
+        //         }
+        //     }
+        // }
 
-                    env.IMAGE_URI =
-                        "${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
+        // stage('Deploy Frontend - QA') {
 
-                    echo "QA IMAGE URI = ${env.IMAGE_URI}"
-                }
-            }
-        }
+        //     steps {
 
+        //         script {
 
-        /*
-         * ============================================================
-         * DEPLOY QA
-         * ============================================================
-         */
+        //             deployFrontend(
+        //                 'qa',
+        //                 env.QA_REPO,
+        //                 env.QA_IMAGE_TAG
+        //             )
+        //         }
+        //     }
+        // }
 
-        stage('Deploy Frontend - QA') {
+        // stage('Promote Frontend - DEV to UAT') {
 
-            steps {
+        //     steps {
 
-                script {
+        //         script {
 
-                    deployFrontend(
-                        'qa',
-                        env.QA_REPO,
-                        env.QA_IMAGE_TAG
-                    )
-                }
-            }
-        }
+        //             env.UAT_IMAGE_TAG = promoteImage(
+        //                 env.DEV_REPO,
+        //                 env.UAT_REPO,
+        //                 env.DEV_IMAGE_TAG,
+        //                 'UAT'
+        //             )
 
+        //             env.IMAGE_URI =
+        //                 "${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
 
-        /*
-         * ============================================================
-         * DEV -> UAT PROMOTION
-         * ============================================================
-         */
+        //             echo "UAT IMAGE URI = ${env.IMAGE_URI}"
+        //         }
+        //     }
+        // }
 
-        stage('Promote Frontend - DEV to UAT') {
+        // stage('Deploy Frontend - UAT') {
 
-            steps {
+        //     steps {
 
-                script {
+        //         script {
 
-                    env.UAT_IMAGE_TAG = promoteImage(
-                        env.DEV_REPO,
-                        env.UAT_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'UAT'
-                    )
+        //             deployFrontend(
+        //                 'uat',
+        //                 env.UAT_REPO,
+        //                 env.UAT_IMAGE_TAG
+        //             )
+        //         }
+        //     }
+        // }
 
-                    env.IMAGE_URI =
-                        "${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
+    //     stage('Production Approval') {
 
-                    echo "UAT IMAGE URI = ${env.IMAGE_URI}"
-                }
-            }
-        }
+    //         steps {
 
+    //             input(
+    //                 message: 'UAT deployment completed. Deploy Frontend to PROD?',
+    //                 ok: 'Deploy to PROD'
+    //             )
+    //         }
+    //     }
 
-        /*
-         * ============================================================
-         * DEPLOY UAT
-         * ============================================================
-         */
+    //     stage('Promote Frontend - DEV to PROD') {
 
-        stage('Deploy Frontend - UAT') {
+    //         steps {
 
-            steps {
+    //             script {
 
-                script {
+    //                 env.PROD_IMAGE_TAG = promoteImage(
+    //                     env.DEV_REPO,
+    //                     env.PROD_REPO,
+    //                     env.DEV_IMAGE_TAG,
+    //                     'PROD'
+    //                 )
 
-                    deployFrontend(
-                        'uat',
-                        env.UAT_REPO,
-                        env.UAT_IMAGE_TAG
-                    )
-                }
-            }
-        }
+    //                 env.IMAGE_URI =
+    //                     "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
 
+    //                 echo "PROD IMAGE URI = ${env.IMAGE_URI}"
+    //             }
+    //         }
+    //     }
 
-        /*
-         * ============================================================
-         * PRODUCTION APPROVAL
-         * ============================================================
-         */
+    //     stage('Deploy Frontend - PROD') {
 
-        stage('Production Approval') {
+    //         steps {
 
-            steps {
+    //             script {
 
-                input(
-                    message: 'UAT deployment completed. Deploy Frontend to PROD?',
-                    ok: 'Deploy to PROD'
-                )
-            }
-        }
-
-
-        /*
-         * ============================================================
-         * DEV -> PROD PROMOTION
-         * ============================================================
-         */
-
-        stage('Promote Frontend - DEV to PROD') {
-
-            steps {
-
-                script {
-
-                    env.PROD_IMAGE_TAG = promoteImage(
-                        env.DEV_REPO,
-                        env.PROD_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'PROD'
-                    )
-
-                    env.IMAGE_URI =
-                        "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
-
-                    echo "PROD IMAGE URI = ${env.IMAGE_URI}"
-                }
-            }
-        }
-
-
-        /*
-         * ============================================================
-         * DEPLOY PROD
-         * ============================================================
-         */
-
-        stage('Deploy Frontend - PROD') {
-
-            steps {
-
-                script {
-
-                    deployFrontend(
-                        'prod',
-                        env.PROD_REPO,
-                        env.PROD_IMAGE_TAG
-                    )
-                }
-            }
-        }
-    }
-
-
-    /*
-     * ================================================================
-     * POST ACTIONS
-     * ================================================================
-     */
+    //                 deployFrontend(
+    //                     'prod',
+    //                     env.PROD_REPO,
+    //                     env.PROD_IMAGE_TAG
+    //                 )
+    //             }
+    //         }
+    //     }
+    // }
 
     post {
 
@@ -362,31 +277,6 @@ pipeline {
     }
 }
 
-
-/*
- * ====================================================================
- * FUNCTION: PROMOTE IMAGE
- * ====================================================================
- *
- * The image is built only in DEV.
- *
- * DEV:
- * app-3-frontend-dev:DEV-abc1234-25
- *
- * QA:
- * app-3-frontend-qa:QA-abc1234-25
- *
- * UAT:
- * app-3-frontend-uat:UAT-abc1234-25
- *
- * PROD:
- * app-3-frontend-prod:PROD-abc1234-25
- *
- * No rebuild happens during promotion.
- *
- * ====================================================================
- */
-
 def promoteImage(
     String sourceRepo,
     String targetRepo,
@@ -414,15 +304,19 @@ def promoteImage(
     echo "======================================"
 
     withCredentials([
-        [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId: env.AWS_CRED]
+        [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'AWS'
+        ]
     ]) {
 
         sh """
             set -e
 
             echo "AWS identity:"
-            aws sts get-caller-identity
+
+            aws sts get-caller-identity \
+                --region ${env.AWS_REGION}
 
             echo "Logging in to ECR..."
 
@@ -453,13 +347,6 @@ def promoteImage(
     return targetTag
 }
 
-
-/*
- * ====================================================================
- * FUNCTION: DEPLOY FRONTEND
- * ====================================================================
- */
-
 def deployFrontend(
     String environment,
     String repository,
@@ -468,9 +355,6 @@ def deployFrontend(
 
     def imageUri =
         "${env.ECR_REGISTRY}/${repository}:${imageTag}"
-
-    def taskDefinitionFile =
-        "new-frontend-task-definition-${environment}.json"
 
     def cluster =
         "app-3-${environment}-cluster"
@@ -481,68 +365,62 @@ def deployFrontend(
     def taskFamily =
         "app-3-${environment}-frontend"
 
+    def taskDefinitionFile =
+        "new-frontend-task-definition-${environment}.json"
+
     echo "======================================"
-    echo "DEPLOY APP-3 FRONTEND"
-    echo "ENVIRONMENT = ${environment}"
-    echo "REPOSITORY  = ${repository}"
-    echo "IMAGE TAG   = ${imageTag}"
-    echo "IMAGE URI   = ${imageUri}"
-    echo "CLUSTER     = ${cluster}"
-    echo "SERVICE     = ${service}"
-    echo "TASK FAMILY = ${taskFamily}"
+    echo "ECS FRONTEND DEPLOYMENT"
+    echo "ENVIRONMENT  = ${environment}"
+    echo "REPOSITORY   = ${repository}"
+    echo "IMAGE TAG    = ${imageTag}"
+    echo "IMAGE URI    = ${imageUri}"
+    echo "CLUSTER      = ${cluster}"
+    echo "SERVICE      = ${service}"
+    echo "TASK FAMILY  = ${taskFamily}"
+    echo "TASK FILE    = ${taskDefinitionFile}"
     echo "======================================"
 
+    if (!fileExists(env.TASK_DEFINITION_TEMPLATE)) {
 
-    /*
-     * ------------------------------------------------------------
-     * CREATE ENVIRONMENT-SPECIFIC TASK DEFINITION
-     * ------------------------------------------------------------
-     */
+        error(
+            "Task definition template not found: " +
+            "${env.TASK_DEFINITION_TEMPLATE}"
+        )
+    }
 
-    withCredentials([
-        [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId: env.AWS_CRED]
-    ]) {
+    sh """
+        set -e
 
-        sh """
-            set -e
+        cp \
+            '${env.TASK_DEFINITION_TEMPLATE}' \
+            '${taskDefinitionFile}'
 
-            ENVIRONMENT="${environment}" \
-            IMAGE_URI="${imageUri}" \
-            TASK_DEFINITION_TEMPLATE="${env.TASK_DEFINITION_TEMPLATE}" \
-            OUTPUT_FILE="${taskDefinitionFile}" \
-            python3 - <<'PY'
-
+        python3 - '${taskDefinitionFile}' '${imageUri}' '${environment}' <<'PY'
 import json
-import os
+import sys
 
-input_file = os.environ["TASK_DEFINITION_TEMPLATE"]
-output_file = os.environ["OUTPUT_FILE"]
+filename = sys.argv[1]
+image_uri = sys.argv[2]
+environment = sys.argv[3]
 
-environment = os.environ["ENVIRONMENT"]
-image_uri = os.environ["IMAGE_URI"]
+with open(filename, "r") as f:
+    data = json.load(f)
 
-with open(input_file, "r") as f:
-    task_definition = json.load(f)
+data["family"] = f"app-3-{environment}-frontend"
 
-# Environment-specific task definition family
-task_definition["family"] = f"app-3-{environment}-frontend"
+updated = False
 
-# Update frontend container image
-for container in task_definition["containerDefinitions"]:
+for container in data.get("containerDefinitions", []):
 
-    if container["name"] == "frontend":
-
+    if container.get("name") == "frontend":
         container["image"] = image_uri
-        break
+        updated = True
 
-else:
-
+if not updated:
     raise Exception(
-        "Container named 'frontend' was not found."
+        "Container named 'frontend' was not found in the task definition."
     )
 
-# Remove AWS-generated fields if present
 for field in [
     "taskDefinitionArn",
     "revision",
@@ -552,91 +430,86 @@ for field in [
     "registeredAt",
     "registeredBy"
 ]:
+    data.pop(field, None)
 
-    task_definition.pop(field, None)
+with open(filename, "w") as f:
+    json.dump(data, f, indent=2)
 
-with open(output_file, "w") as f:
-
-    json.dump(
-        task_definition,
-        f,
-        indent=2
-    )
-
+print("Updated frontend container image:")
+print(image_uri)
 PY
 
-            echo "======================================"
-            echo "Generated FRONTEND task definition:"
-            echo "======================================"
+        echo "Generated task definition:"
+        cat '${taskDefinitionFile}'
+    """
 
-            cat ${taskDefinitionFile}
-        """
-    }
+    withCredentials([
+        [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'AWS'
+        ]
+    ]) {
 
+        echo "Checking AWS credentials..."
 
-    /*
-     * ------------------------------------------------------------
-     * REGISTER TASK DEFINITION
-     * ------------------------------------------------------------
-     */
-
-    def revision = sh(
-
-        script: """
+        sh """
             set -e
 
-            aws ecs register-task-definition \
-                --cli-input-json file://${taskDefinitionFile} \
-                --region ${env.AWS_REGION} \
-                --query 'taskDefinition.revision' \
-                --output text
-        """,
+            aws sts get-caller-identity \
+                --region ${env.AWS_REGION}
+        """
 
-        returnStdout: true
-    ).trim()
+        def revision = sh(
+            script: """
+                set -e
 
-    echo "AWS REGISTERED REVISION = '${revision}'"
+                aws ecs register-task-definition \
+                    --cli-input-json file://${taskDefinitionFile} \
+                    --region ${env.AWS_REGION} \
+                    --query 'taskDefinition.revision' \
+                    --output text
+            """,
+            returnStdout: true
+        ).trim()
 
-    if (!revision ||
-        revision == 'null' ||
-        revision == 'None') {
+        echo "AWS REGISTERED REVISION = '${revision}'"
 
-        error(
-            "ECS returned invalid revision: '${revision}'"
-        )
+        if (!revision ||
+            revision == 'null' ||
+            revision == 'None') {
+
+            error(
+                "ECS returned invalid revision: '${revision}'"
+            )
+        }
+
+        echo "Updating ECS service..."
+
+        sh """
+            set -e
+
+            echo "Cluster     = ${cluster}"
+            echo "Service     = ${service}"
+            echo "Task Family = ${taskFamily}"
+            echo "Revision    = ${revision}"
+
+            aws ecs update-service \
+                --cluster ${cluster} \
+                --service ${service} \
+                --task-definition ${taskFamily}:${revision} \
+                --force-new-deployment \
+                --region ${env.AWS_REGION}
+
+            echo "Waiting for ECS service to become stable..."
+
+            aws ecs wait services-stable \
+                --cluster ${cluster} \
+                --services ${service} \
+                --region ${env.AWS_REGION}
+
+            echo "ECS service is stable."
+        """
     }
-
-
-    /*
-     * ------------------------------------------------------------
-     * UPDATE ECS SERVICE
-     * ------------------------------------------------------------
-     */
-
-    echo "Updating ECS frontend service..."
-
-    sh """
-        set -e
-
-        echo "Cluster     = ${cluster}"
-        echo "Service     = ${service}"
-        echo "Task Family = ${taskFamily}"
-        echo "Revision    = ${revision}"
-
-        aws ecs update-service \
-            --cluster ${cluster} \
-            --service ${service} \
-            --task-definition ${taskFamily}:${revision} \
-            --force-new-deployment \
-            --region ${env.AWS_REGION}
-
-        echo "Waiting for ECS frontend service to become stable..."
-
-        aws ecs wait services-stable \
-            --cluster ${cluster} \
-            --services ${service} \
-            --region ${env.AWS_REGION}
-    """
 
     echo "======================================"
     echo "APP-3 FRONTEND ${environment.toUpperCase()} DEPLOYMENT SUCCESSFUL"
