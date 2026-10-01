@@ -12,8 +12,8 @@ pipeline {
 
         ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-        // DEV_REPO  = 'app-3-dev-db'
-        QA_REPO = 'app-3-qa-db'
+        DEV_REPO = 'app-3-dev-db'
+        QA_REPO  = 'app-3-qa-db'
         // UAT_REPO  = 'app-3-uat-db'
         // PROD_REPO = 'app-3-prod-db'
 
@@ -57,11 +57,14 @@ pipeline {
                      * DEV-def5678-25
                      */
 
-                    def imageTag = "DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
+                    def imageTag =
+                        "DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
 
                     env.DEV_IMAGE_TAG = imageTag
 
-                    def imageUri = "${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
+                    def imageUri =
+                        "${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
+
                     env.DEV_IMAGE_URI = imageUri
 
                     echo "======================================"
@@ -422,8 +425,7 @@ image_uri = os.environ["IMAGE_URI"]
 with open(input_file, "r") as f:
     task_definition = json.load(f)
 
-task_definition["family"] = \\
-    f"app-3-{environment}-db"
+task_definition["family"] = f"app-3-{environment}-db"
 
 container_found = False
 
@@ -476,21 +478,21 @@ PYTHON
 
             echo "Generated task definition:"
 
-            cat ${taskDefinitionFile}
+            cat "${taskDefinitionFile}"
 
             echo "Registering ECS task definition..."
 
-            REVISION=\\$(aws ecs register-task-definition \\
+            REVISION=\\\$(aws ecs register-task-definition \\
                 --cli-input-json file://${taskDefinitionFile} \\
                 --region ${env.AWS_REGION} \\
                 --query 'taskDefinition.revision' \\
                 --output text)
 
-            echo "AWS REGISTERED REVISION = \\$REVISION"
+            echo "AWS REGISTERED REVISION = \\\$REVISION"
 
-            if [ -z "\\$REVISION" ] || \\
-               [ "\\$REVISION" = "null" ] || \\
-               [ "\\$REVISION" = "None" ]; then
+            if [ -z "\\\$REVISION" ] || \\
+               [ "\\\$REVISION" = "null" ] || \\
+               [ "\\\$REVISION" = "None" ]; then
 
                 echo "ERROR: ECS returned invalid revision."
 
@@ -502,7 +504,7 @@ PYTHON
             aws ecs update-service \\
                 --cluster app-3-${environment}-cluster \\
                 --service app-3-${environment}-db-service \\
-                --task-definition app-3-${environment}-db:\\$REVISION \\
+                --task-definition app-3-${environment}-db:\\\$REVISION \\
                 --force-new-deployment \\
                 --region ${env.AWS_REGION}
 
