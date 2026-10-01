@@ -343,157 +343,78 @@ def promoteImage(
 }
 
 def deployBackend(
-    String environment,
-    String repository,
-    String imageTag
+    indent=2
 ) {
 
-    def imageUri =
-        "${env.ECR_REGISTRY}/${repository}:${imageTag}"
+    // your existing task-definition generation code
+    // ...
+    // echo "Generated task definition:"
+    // cat ${taskDefinitionFile}
 
-    def taskDefinitionFile =
-        "new-backend-task-definition-${environment}.json"
-
-    def cluster =
-        "app-3-${environment}-cluster"
-
-    def service =
-        "app-3-${environment}-backend-service"
-
-    def taskFamily =
-        "app-3-${environment}-backend"
-
-    echo "======================================"
-    echo "DEPLOY APP-3 BACKEND"
-    echo "ENVIRONMENT = ${environment}"
-    echo "REPOSITORY  = ${repository}"
-    echo "IMAGE TAG   = ${imageTag}"
-    echo "IMAGE URI   = ${imageUri}"
-    echo "CLUSTER     = ${cluster}"
-    echo "SERVICE     = ${service}"
-    echo "TASK FAMILY = ${taskFamily}"
-    echo "======================================"
 
     withCredentials([
         [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId:'AWS']
+         credentialsId: 'AWS']
     ]) {
+
+        echo "Checking AWS credentials..."
 
         sh """
             set -e
 
-            ENVIRONMENT="${environment}" \
-            IMAGE_URI="${imageUri}" \
-            TASK_DEFINITION_TEMPLATE="${env.TASK_DEFINITION_TEMPLATE}" \
-            OUTPUT_FILE="${taskDefinitionFile}" \
-            python3 - <<'PY'
-
-import json
-import os
-
-input_file = os.environ["TASK_DEFINITION_TEMPLATE"]
-output_file = os.environ["OUTPUT_FILE"]
-
-environment = os.environ["ENVIRONMENT"]
-image_uri = os.environ["IMAGE_URI"]
-
-with open(input_file, "r") as f:
-    task_definition = json.load(f)
-
-# Environment-specific task family
-task_definition["family"] = f"app-3-{environment}-backend"
-
-# Update backend container image
-for container in task_definition["containerDefinitions"]:
-
-    if container["name"] == "backend":
-
-        container["image"] = image_uri
-        break
-
-else:
-
-    raise Exception(
-        "Container named 'backend' was not found."
-    )
-
-# Remove AWS-generated fields if present
-for field in [
-    "taskDefinitionArn",
-    "revision",
-    "status",
-    "requiresAttributes",
-    "compatibilities",
-    "registeredAt",
-    "registeredBy"
-]:
-
-    task_definition.pop(field, None)
-
-with open(output_file, "w") as f:
-
-    json.dump(
-        task_definition,
-        f,
-        indent=2
-    )
-
-PY
-
-            echo "Generated task definition:"
-            cat ${taskDefinitionFile}
+            aws sts get-caller-identity \
+                --region ${env.AWS_REGION}
         """
-    }
 
+        def revision = sh(
+            script: """
+                set -e
 
-    def revision = sh(
-        script: """
+                aws ecs register-task-definition \
+                    --cli-input-json file://${taskDefinitionFile} \
+                    --region ${env.AWS_REGION} \
+                    --query 'taskDefinition.revision' \
+                    --output text
+            """,
+            returnStdout: true
+        ).trim()
+
+        echo "AWS REGISTERED REVISION = '${revision}'"
+
+        if (!revision ||
+            revision == 'null' ||
+            revision == 'None') {
+
+            error(
+                "ECS returned invalid revision: '${revision}'"
+            )
+        }
+
+        echo "Updating ECS service..."
+
+        sh """
             set -e
 
-            aws ecs register-task-definition \
-                --cli-input-json file://${taskDefinitionFile} \
-                --region ${env.AWS_REGION} \
-                --query 'taskDefinition.revision' \
-                --output text
-        """,
-        returnStdout: true
-    ).trim()
+            echo "Cluster     = ${cluster}"
+            echo "Service     = ${service}"
+            echo "Task Family = ${taskFamily}"
+            echo "Revision    = ${revision}"
 
-    echo "AWS REGISTERED REVISION = '${revision}'"
+            aws ecs update-service \
+                --cluster ${cluster} \
+                --service ${service} \
+                --task-definition ${taskFamily}:${revision} \
+                --force-new-deployment \
+                --region ${env.AWS_REGION}
 
-    if (!revision ||
-        revision == 'null' ||
-        revision == 'None') {
+            echo "Waiting for ECS service to become stable..."
 
-        error(
-            "ECS returned invalid revision: '${revision}'"
-        )
+            aws ecs wait services-stable \
+                --cluster ${cluster} \
+                --services ${service} \
+                --region ${env.AWS_REGION}
+        """
     }
-
-    echo "Updating ECS service..."
-
-    sh """
-        set -e
-
-        echo "Cluster     = ${cluster}"
-        echo "Service     = ${service}"
-        echo "Task Family = ${taskFamily}"
-        echo "Revision    = ${revision}"
-
-        aws ecs update-service \
-            --cluster ${cluster} \
-            --service ${service} \
-            --task-definition ${taskFamily}:${revision} \
-            --force-new-deployment \
-            --region ${env.AWS_REGION}
-
-        echo "Waiting for ECS service to become stable..."
-
-        aws ecs wait services-stable \
-            --cluster ${cluster} \
-            --services ${service} \
-            --region ${env.AWS_REGION}
-    """
 
     echo "======================================"
     echo "APP-3 BACKEND ${environment.toUpperCase()} DEPLOYMENT SUCCESSFUL"
