@@ -9,16 +9,16 @@ pipeline {
         AWS_ACCOUNT_ID = '552940445807'
         AWS_CRED       = 'AWS'
 
-        ECR_REGISTRY ="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        ECR_REGISTRY =
+            "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-        DEV_REPO  = 'app-3-dev-backend'
-       // QA_REPO   = 'app-3-qa-backend'
-       // UAT_REPO  = 'app-3-uat-backend'
-       // PROD_REPO = 'app-3-prod-backend'
+        DEV_REPO = 'app-3-dev-backend'
 
-        BUILD_CONTEXT ='./react-java-mysql/backend'
+        BUILD_CONTEXT =
+            './react-java-mysql/backend'
 
-        TASK_DEFINITION_TEMPLATE ='./react-java-mysql/backend/task-definition.json'
+        TASK_DEFINITION_TEMPLATE =
+            './react-java-mysql/backend/task-definition.json'
     }
 
     stages {
@@ -37,7 +37,7 @@ pipeline {
                     ).trim()
 
                     echo "======================================"
-                    echo "COMMIT ID = ${env.COMMIT_ID}"
+                    echo "COMMIT ID    = ${env.COMMIT_ID}"
                     echo "BUILD NUMBER = ${env.BUILD_NUMBER}"
                     echo "======================================"
                 }
@@ -129,123 +129,99 @@ pipeline {
             }
         }
 
-        // stage('Promote Backend - DEV to QA') {
+        // stage('QA - Promote Backend Image') {
 
-        // steps {
+        //     steps {
 
-        // script {
+        //         script {
 
-        // env.QA_IMAGE_TAG = promoteImage(
-        // env.DEV_REPO,
-        // env.QA_REPO,
-        // env.DEV_IMAGE_TAG,
-        // 'QA'
-        // )
-
-        // env.IMAGE_URI =
-        // "${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
-
-        // echo "QA IMAGE URI = ${env.IMAGE_URI}"
-        // }
-        // }
+        //             env.QA_IMAGE_TAG = promoteImage(
+        //                 env.DEV_REPO,
+        //                 env.QA_REPO,
+        //                 env.DEV_IMAGE_TAG,
+        //                 'QA'
+        //             )
+        //         }
+        //     }
         // }
 
         // stage('Deploy Backend - QA') {
 
-        // steps {
+        //     steps {
 
-        // script {
+        //         script {
 
-        // deployBackend(
-        // 'qa',
-        // env.QA_REPO,
-        // env.QA_IMAGE_TAG
-        // )
+        //             deployBackend(
+        //                 'qa',
+        //                 env.QA_REPO,
+        //                 env.QA_IMAGE_TAG
+        //             )
+        //         }
+        //     }
         // }
+
+        // stage('UAT - Promote Backend Image') {
+
+        //     steps {
+
+        //         script {
+
+        //             env.UAT_IMAGE_TAG = promoteImage(
+        //                 env.QA_REPO,
+        //                 env.UAT_REPO,
+        //                 env.QA_IMAGE_TAG,
+        //                 'UAT'
+        //             )
+        //         }
+        //     }
         // }
-        // }
 
-        // stage('Promote Backend - DEV to UAT') {
-
-        // steps {
-
-        // script {
-
-        // env.UAT_IMAGE_TAG = promoteImage(
-        // env.DEV_REPO,
-        // env.UAT_REPO,
-        // env.DEV_IMAGE_TAG,
-        // 'UAT'
-        // )
-
-        // env.IMAGE_URI =
-        // "${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
-
-        // echo "UAT IMAGE URI = ${env.IMAGE_URI}"
-        // }
-        // }
-        // }
         // stage('Deploy Backend - UAT') {
 
-        // steps {
+        //     steps {
 
-        // script {
+        //         script {
 
-        // deployBackend(
-        // 'uat',
-        // env.UAT_REPO,
-        // env.UAT_IMAGE_TAG
-        // )
-        // }
-        // }
-        // }
-
-        // stage('Production Approval') {
-
-        // steps {
-
-        // input(
-        // message: 'UAT deployment completed. Deploy Backend to PROD?',
-        // ok: 'Deploy to PROD'
-        // )
-        // }
+        //             deployBackend(
+        //                 'uat',
+        //                 env.UAT_REPO,
+        //                 env.UAT_IMAGE_TAG
+        //             )
+        //         }
+        //     }
         // }
 
+        // stage('PROD - Promote Backend Image') {
 
-        // stage('Promote Backend - DEV to PROD') {
+        //     steps {
 
-        // steps {
+        //         script {
 
-        // script {
-
-        // env.PROD_IMAGE_TAG = promoteImage(
-        // env.DEV_REPO,
-        // env.PROD_REPO,
-        // env.DEV_IMAGE_TAG,
-        // 'PROD'
-        // )
-
-        // env.IMAGE_URI =
-        // "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
-
-        // echo "PROD IMAGE URI = ${env.IMAGE_URI}"
-        // }
-        // }
+        //             env.PROD_IMAGE_TAG = promoteImage(
+        //                 env.UAT_REPO,
+        //                 env.PROD_REPO,
+        //                 env.UAT_IMAGE_TAG,
+        //                 'PROD'
+        //             )
+        //         }
+        //     }
         // }
 
         // stage('Deploy Backend - PROD') {
 
-        // steps {
+        //     steps {
 
-        // script {
+        //         input message: 'Deploy Backend to PROD?', ok: 'Deploy'
 
-        // deployBackend(
-        // 'prod',
-        // env.PROD_REPO,
-        // env.PROD_IMAGE_TAG
-        // )
-        // }
-        // }
+        //         script {
+
+        //             deployBackend(
+        //                 'prod',
+        //                 env.PROD_REPO,
+        //                 env.PROD_IMAGE_TAG
+        //             )
+        //         }
+        //     }
         // }
     }
 
@@ -294,24 +270,28 @@ def promoteImage(
 
     echo "======================================"
     echo "IMAGE PROMOTION"
-    echo "SOURCE REPO = ${sourceRepo}"
-    echo "SOURCE TAG  = ${sourceTag}"
+    echo "SOURCE REPO  = ${sourceRepo}"
+    echo "SOURCE TAG   = ${sourceTag}"
     echo "SOURCE IMAGE = ${sourceImage}"
-    echo "TARGET REPO = ${targetRepo}"
-    echo "TARGET TAG  = ${targetTag}"
+    echo "TARGET REPO  = ${targetRepo}"
+    echo "TARGET TAG   = ${targetTag}"
     echo "TARGET IMAGE = ${targetImage}"
     echo "======================================"
 
     withCredentials([
-        [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId:'AWS']
+        [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'AWS'
+        ]
     ]) {
 
         sh """
             set -e
 
             echo "AWS identity:"
-            aws sts get-caller-identity
+
+            aws sts get-caller-identity \
+                --region ${env.AWS_REGION}
 
             echo "Logging in to ECR..."
 
@@ -343,18 +323,92 @@ def promoteImage(
 }
 
 def deployBackend(
-    indent=2
+    String environment,
+    String repository,
+    String imageTag
 ) {
 
-    // your existing task-definition generation code
-    // ...
-    // echo "Generated task definition:"
-    // cat ${taskDefinitionFile}
+    def imageUri =
+        "${env.ECR_REGISTRY}/${repository}:${imageTag}"
 
+    def cluster =
+        "app-3-${environment}-cluster"
+
+    def service =
+        "app-3-${environment}-backend-service"
+
+    def taskFamily =
+        "app-3-${environment}-backend"
+
+    def taskDefinitionFile =
+        "new-backend-task-definition-${environment}.json"
+
+    echo "======================================"
+    echo "ECS BACKEND DEPLOYMENT"
+    echo "ENVIRONMENT  = ${environment}"
+    echo "REPOSITORY   = ${repository}"
+    echo "IMAGE TAG    = ${imageTag}"
+    echo "IMAGE URI    = ${imageUri}"
+    echo "CLUSTER      = ${cluster}"
+    echo "SERVICE      = ${service}"
+    echo "TASK FAMILY  = ${taskFamily}"
+    echo "TASK FILE    = ${taskDefinitionFile}"
+    echo "======================================"
+
+    if (!fileExists(env.TASK_DEFINITION_TEMPLATE)) {
+
+        error(
+            "Task definition template not found: " +
+            "${env.TASK_DEFINITION_TEMPLATE}"
+        )
+    }
+
+    sh """
+        set -e
+
+        cp \
+            '${env.TASK_DEFINITION_TEMPLATE}' \
+            '${taskDefinitionFile}'
+
+        python3 - '${taskDefinitionFile}' '${imageUri}' <<'PY'
+import json
+import sys
+
+filename = sys.argv[1]
+image_uri = sys.argv[2]
+
+with open(filename, "r") as f:
+    data = json.load(f)
+
+updated = False
+
+for container in data.get("containerDefinitions", []):
+
+    if container.get("name") == "backend":
+        container["image"] = image_uri
+        updated = True
+
+if not updated:
+    raise Exception(
+        "Container named 'backend' was not found in the task definition."
+    )
+
+with open(filename, "w") as f:
+    json.dump(data, f, indent=2)
+
+print("Updated backend container image:")
+print(image_uri)
+PY
+
+        echo "Generated task definition:"
+        cat '${taskDefinitionFile}'
+    """
 
     withCredentials([
-        [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId: 'AWS']
+        [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'AWS'
+        ]
     ]) {
 
         echo "Checking AWS credentials..."
@@ -413,6 +467,8 @@ def deployBackend(
                 --cluster ${cluster} \
                 --services ${service} \
                 --region ${env.AWS_REGION}
+
+            echo "ECS service is stable."
         """
     }
 
@@ -421,3 +477,4 @@ def deployBackend(
     echo "IMAGE = ${imageUri}"
     echo "======================================"
 }
+
