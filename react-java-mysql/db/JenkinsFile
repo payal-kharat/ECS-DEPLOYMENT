@@ -309,7 +309,7 @@ Check the Jenkins console output.
         }
     }
 }
-
+}
 def promoteImage(
     String sourceRepo,
     String targetRepo,
@@ -564,5 +564,5 @@ PYTHON
         """
     }
 }
-}
+
 
