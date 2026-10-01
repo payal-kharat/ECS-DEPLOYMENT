@@ -25,7 +25,7 @@
         },
         {
           "name": "MYSQL_HOST",
-          "value": "app3-db.app3.local"
+          "value": "app3-db.app3-dev.local"
         },
         {
           "name": "MYSQL_USER",
