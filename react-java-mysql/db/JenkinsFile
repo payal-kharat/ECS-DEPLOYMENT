@@ -482,17 +482,17 @@ PYTHON
 
             echo "Registering ECS task definition..."
 
-            REVISION=\\\$(aws ecs register-task-definition \\
+            REVISION=\$(aws ecs register-task-definition \\
                 --cli-input-json file://${taskDefinitionFile} \\
                 --region ${env.AWS_REGION} \\
                 --query 'taskDefinition.revision' \\
                 --output text)
 
-            echo "AWS REGISTERED REVISION = \\\$REVISION"
+            echo "AWS REGISTERED REVISION = \$REVISION"
 
-            if [ -z "\\\$REVISION" ] || \\
-               [ "\\\$REVISION" = "null" ] || \\
-               [ "\\\$REVISION" = "None" ]; then
+            if [ -z "\$REVISION" ] || \\
+               [ "\$REVISION" = "null" ] || \\
+               [ "\$REVISION" = "None" ]; then
 
                 echo "ERROR: ECS returned invalid revision."
 
@@ -504,7 +504,7 @@ PYTHON
             aws ecs update-service \\
                 --cluster app-3-${environment}-cluster \\
                 --service app-3-${environment}-db-service \\
-                --task-definition app-3-${environment}-db:\\\$REVISION \\
+                --task-definition app-3-${environment}-db:\$REVISION \\
                 --force-new-deployment \\
                 --region ${env.AWS_REGION}
 
@@ -522,4 +522,5 @@ PYTHON
         """
     }
 }
+
 
