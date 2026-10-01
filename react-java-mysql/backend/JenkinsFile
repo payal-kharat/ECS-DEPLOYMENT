@@ -376,7 +376,7 @@ def deployBackend(
 
     withCredentials([
         [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId: env.AWS_CRED]
+         credentialsId: AWS]
     ]) {
 
         sh """
