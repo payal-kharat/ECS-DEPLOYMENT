@@ -10,7 +10,7 @@ pipeline {
         AWS_CRED       = 'AWS'
         ECR_REGISTRY ="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         DEV_REPO  = 'app-3-dev-frontend'
-        QA_REPO   = 'app-3-frontend-qa'
+        QA_REPO   = 'app-3-qa-frontend'
     //  UAT_REPO  = 'app-3-frontend-uat'
     //  PROD_REPO = 'app-3-frontend-prod'
         BUILD_CONTEXT ='./react-java-mysql/frontend'
