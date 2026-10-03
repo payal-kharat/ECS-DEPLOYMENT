@@ -8,37 +8,24 @@ pipeline {
         AWS_REGION     = 'us-east-1'
         AWS_ACCOUNT_ID = '552940445807'
         AWS_CRED       = 'AWS'
-
-        ECR_REGISTRY =
-            "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-
+        ECR_REGISTRY ="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         DEV_REPO  = 'app-3-dev-frontend'
-        // QA_REPO   = 'app-3-frontend-qa'
-        // UAT_REPO  = 'app-3-frontend-uat'
-        // PROD_REPO = 'app-3-frontend-prod'
-
-        BUILD_CONTEXT =
-            './react-java-mysql/frontend'
-
-        TASK_DEFINITION_TEMPLATE =
-            './react-java-mysql/frontend/task-definition.json'
+        QA_REPO   = 'app-3-frontend-qa'
+    //  UAT_REPO  = 'app-3-frontend-uat'
+    //  PROD_REPO = 'app-3-frontend-prod'
+        BUILD_CONTEXT ='./react-java-mysql/frontend'
+        TASK_DEFINITION_TEMPLATE ='./react-java-mysql/frontend/task-definition.json'
     }
 
     stages {
-
         stage('Checkout') {
-
             steps {
-
                 checkout scm
-
                 script {
-
                     env.COMMIT_ID = sh(
                         script: 'git rev-parse --short=7 HEAD',
                         returnStdout: true
                     ).trim()
-
                     echo "======================================"
                     echo "COMMIT ID    = ${env.COMMIT_ID}"
                     echo "BUILD NUMBER = ${env.BUILD_NUMBER}"
@@ -48,17 +35,10 @@ pipeline {
         }
 
         stage('DEV - Build Frontend Image') {
-
             steps {
-
                 script {
-
-                    def imageTag =
-                        "DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
-
-                    def imageUri =
-                        "${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
-
+                    def imageTag ="DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
+                    def imageUri ="${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
                     echo "======================================"
                     echo "BUILDING FRONTEND IMAGE"
                     echo "ENVIRONMENT  = DEV"
@@ -67,15 +47,12 @@ pipeline {
                     echo "IMAGE TAG    = ${imageTag}"
                     echo "IMAGE URI    = ${imageUri}"
                     echo "======================================"
-
                     env.DEV_IMAGE_TAG = imageTag
                     env.IMAGE_URI = imageUri
-
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
                         "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
                     ) {
-
                         docker.build(
                             imageUri,
                             env.BUILD_CONTEXT
@@ -88,13 +65,9 @@ pipeline {
         }
 
         stage('DEV - Push Frontend Image') {
-
             steps {
-
                 script {
-
-                    if (!env.IMAGE_URI?.trim()) {
-
+                  if (!env.IMAGE_URI?.trim()) {
                         error(
                             "IMAGE_URI is empty. " +
                             "DEV build must complete first."
@@ -103,12 +76,10 @@ pipeline {
 
                     echo "Pushing DEV frontend image..."
                     echo "IMAGE URI = ${env.IMAGE_URI}"
-
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
                         "ecr:${env.AWS_REGION}:${env.AWS_CRED}"
                     ) {
-
                         docker.image(env.IMAGE_URI).push()
                     }
 
@@ -117,63 +88,48 @@ pipeline {
             }
         }
 
-        stage('Deploy Frontend - DEV') {
+        // stage('Deploy Frontend - DEV') {
+        //     steps {
+        //         script {
+        //             deployFrontend(
+        //                 'dev',
+        //                 env.DEV_REPO,
+        //                 env.DEV_IMAGE_TAG
+        //             )
+        //         }
+        //     }
+        // }
 
+        stage('Promote Frontend - DEV to QA') {
             steps {
-
                 script {
-
-                    deployFrontend(
-                        'dev',
+                    env.QA_IMAGE_TAG = promoteImage(
                         env.DEV_REPO,
-                        env.DEV_IMAGE_TAG
+                        env.QA_REPO,
+                        env.DEV_IMAGE_TAG,
+                        'QA'
+                    )
+                    env.IMAGE_URI ="${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
+                    echo "QA IMAGE URI = ${env.IMAGE_URI}"
+                }
+            }
+        }
+
+        stage('Deploy Frontend - QA') {
+            steps {
+                script {
+                    deployFrontend(
+                        'qa',
+                        env.QA_REPO,
+                        env.QA_IMAGE_TAG
                     )
                 }
             }
         }
 
-        // stage('Promote Frontend - DEV to QA') {
-
-        //     steps {
-
-        //         script {
-
-        //             env.QA_IMAGE_TAG = promoteImage(
-        //                 env.DEV_REPO,
-        //                 env.QA_REPO,
-        //                 env.DEV_IMAGE_TAG,
-        //                 'QA'
-        //             )
-
-        //             env.IMAGE_URI =
-        //                 "${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
-
-        //             echo "QA IMAGE URI = ${env.IMAGE_URI}"
-        //         }
-        //     }
-        // }
-
-        // stage('Deploy Frontend - QA') {
-
-        //     steps {
-
-        //         script {
-
-        //             deployFrontend(
-        //                 'qa',
-        //                 env.QA_REPO,
-        //                 env.QA_IMAGE_TAG
-        //             )
-        //         }
-        //     }
-        // }
-
         // stage('Promote Frontend - DEV to UAT') {
-
         //     steps {
-
         //         script {
-
         //             env.UAT_IMAGE_TAG = promoteImage(
         //                 env.DEV_REPO,
         //                 env.UAT_REPO,
@@ -181,20 +137,15 @@ pipeline {
         //                 'UAT'
         //             )
 
-        //             env.IMAGE_URI =
-        //                 "${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
-
+        //             env.IMAGE_URI ="${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
         //             echo "UAT IMAGE URI = ${env.IMAGE_URI}"
         //         }
         //     }
         // }
 
         // stage('Deploy Frontend - UAT') {
-
         //     steps {
-
         //         script {
-
         //             deployFrontend(
         //                 'uat',
         //                 env.UAT_REPO,
@@ -205,9 +156,7 @@ pipeline {
         // }
 
         // stage('Production Approval') {
-
         //     steps {
-
         //         input(
         //             message: 'UAT deployment completed. Deploy Frontend to PROD?',
         //             ok: 'Deploy to PROD'
@@ -216,32 +165,23 @@ pipeline {
         // }
 
         // stage('Promote Frontend - DEV to PROD') {
-
         //     steps {
-
         //         script {
-
         //             env.PROD_IMAGE_TAG = promoteImage(
         //                 env.DEV_REPO,
         //                 env.PROD_REPO,
         //                 env.DEV_IMAGE_TAG,
         //                 'PROD'
         //             )
-
-        //             env.IMAGE_URI =
-        //                 "${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
-
+        //             env.IMAGE_URI ="${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
         //             echo "PROD IMAGE URI = ${env.IMAGE_URI}"
         //         }
         //     }
         // }
 
         // stage('Deploy Frontend - PROD') {
-
         //     steps {
-
         //         script {
-
         //             deployFrontend(
         //                 'prod',
         //                 env.PROD_REPO,
@@ -266,14 +206,12 @@ pipeline {
         }
 
         failure {
-
             echo "======================================"
             echo "APP-3 FRONTEND PIPELINE FAILED"
             echo "======================================"
         }
 
         always {
-
             cleanWs()
         }
     }
@@ -287,14 +225,9 @@ def promoteImage(
     String targetEnvironment
 ) {
 
-    def sourceImage =
-        "${env.ECR_REGISTRY}/${sourceRepo}:${sourceTag}"
-
-    def targetTag =
-        "${targetEnvironment}-${sourceTag.replaceFirst('^DEV-', '')}"
-
-    def targetImage =
-        "${env.ECR_REGISTRY}/${targetRepo}:${targetTag}"
+    def sourceImage ="${env.ECR_REGISTRY}/${sourceRepo}:${sourceTag}"
+    def targetTag ="${targetEnvironment}-${sourceTag.replaceFirst('^DEV-', '')}"
+    def targetImage ="${env.ECR_REGISTRY}/${targetRepo}:${targetTag}"
 
     echo "======================================"
     echo "IMAGE PROMOTION"
@@ -312,17 +245,12 @@ def promoteImage(
             credentialsId: 'AWS'
         ]
     ]) {
-
         sh """
             set -e
-
             echo "AWS identity:"
-
             aws sts get-caller-identity \
                 --region ${env.AWS_REGION}
-
             echo "Logging in to ECR..."
-
             aws ecr get-login-password \
                 --region ${env.AWS_REGION} | \
             docker login \
@@ -330,19 +258,14 @@ def promoteImage(
                 --password-stdin ${env.ECR_REGISTRY}
 
             echo "Pulling DEV frontend image..."
-
             docker pull ${sourceImage}
-
             echo "Tagging image for ${targetEnvironment}..."
 
             docker tag \
                 ${sourceImage} \
                 ${targetImage}
-
             echo "Pushing promoted frontend image..."
-
             docker push ${targetImage}
-
             echo "Image promotion completed."
         """
     }
@@ -357,20 +280,11 @@ def deployFrontend(
     String imageTag
 ) {
 
-    def imageUri =
-        "${env.ECR_REGISTRY}/${repository}:${imageTag}"
-
-    def cluster =
-        "app-3-${environment}-cluster"
-
-    def service =
-        "app-3-${environment}-frontend-service"
-
-    def taskFamily =
-        "app-3-${environment}-frontend"
-
-    def taskDefinitionFile =
-        "new-frontend-task-definition-${environment}.json"
+    def imageUri ="${env.ECR_REGISTRY}/${repository}:${imageTag}"
+    def cluster ="app-3-${environment}-cluster"
+    def service ="app-3-${environment}-frontend-service"
+    def taskFamily ="app-3-${environment}-frontend"
+    def taskDefinitionFile ="new-frontend-task-definition-${environment}.json"
 
     echo "======================================"
     echo "ECS FRONTEND DEPLOYMENT"
@@ -385,7 +299,6 @@ def deployFrontend(
     echo "======================================"
 
     if (!fileExists(env.TASK_DEFINITION_TEMPLATE)) {
-
         error(
             "Task definition template not found: " +
             "${env.TASK_DEFINITION_TEMPLATE}"
@@ -394,11 +307,9 @@ def deployFrontend(
 
     sh """
         set -e
-
         cp \
             '${env.TASK_DEFINITION_TEMPLATE}' \
             '${taskDefinitionFile}'
-
         python3 - '${taskDefinitionFile}' '${imageUri}' '${environment}' <<'PY'
 import json
 import sys
@@ -406,14 +317,10 @@ import sys
 filename = sys.argv[1]
 image_uri = sys.argv[2]
 environment = sys.argv[3]
-
 with open(filename, "r") as f:
     data = json.load(f)
-
 data["family"] = f"app-3-{environment}-frontend"
-
 updated = False
-
 for container in data.get("containerDefinitions", []):
 
     if container.get("name") == "frontend":
@@ -435,7 +342,6 @@ for field in [
     "registeredBy"
 ]:
     data.pop(field, None)
-
 with open(filename, "w") as f:
     json.dump(data, f, indent=2)
 
@@ -455,10 +361,8 @@ PY
     ]) {
 
         echo "Checking AWS credentials..."
-
         sh """
             set -e
-
             aws sts get-caller-identity \
                 --region ${env.AWS_REGION}
         """
@@ -466,7 +370,6 @@ PY
         def revision = sh(
             script: """
                 set -e
-
                 aws ecs register-task-definition \
                     --cli-input-json file://${taskDefinitionFile} \
                     --region ${env.AWS_REGION} \
@@ -477,21 +380,17 @@ PY
         ).trim()
 
         echo "AWS REGISTERED REVISION = '${revision}'"
-
         if (!revision ||
             revision == 'null' ||
             revision == 'None') {
-
             error(
                 "ECS returned invalid revision: '${revision}'"
             )
         }
 
         echo "Updating ECS service..."
-
         sh """
             set -e
-
             echo "Cluster     = ${cluster}"
             echo "Service     = ${service}"
             echo "Task Family = ${taskFamily}"
@@ -520,4 +419,3 @@ PY
     echo "IMAGE = ${imageUri}"
     echo "======================================"
 }
-
