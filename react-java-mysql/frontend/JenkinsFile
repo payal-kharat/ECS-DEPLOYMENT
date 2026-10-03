@@ -10,9 +10,9 @@ pipeline {
         AWS_CRED       = 'AWS'
         ECR_REGISTRY ="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         DEV_REPO  = 'app-3-dev-frontend'
-        QA_REPO   = 'app-3-qa-frontend'
-    //  UAT_REPO  = 'app-3-frontend-uat'
-    //  PROD_REPO = 'app-3-frontend-prod'
+        // QA_REPO   = 'app-3-qa-frontend'
+        // UAT_REPO  = 'app-3-uat-frontend'
+        PROD_REPO = 'app-3-prod-frontend'
         BUILD_CONTEXT ='./react-java-mysql/frontend'
         TASK_DEFINITION_TEMPLATE ='./react-java-mysql/frontend/task-definition.json'
     }
@@ -100,32 +100,32 @@ pipeline {
         //     }
         // }
 
-        stage('Promote Frontend - DEV to QA') {
-            steps {
-                script {
-                    env.QA_IMAGE_TAG = promoteImage(
-                        env.DEV_REPO,
-                        env.QA_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'QA'
-                    )
-                    env.IMAGE_URI ="${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
-                    echo "QA IMAGE URI = ${env.IMAGE_URI}"
-                }
-            }
-        }
+        // stage('Promote Frontend - DEV to QA') {
+        //     steps {
+        //         script {
+        //             env.QA_IMAGE_TAG = promoteImage(
+        //                 env.DEV_REPO,
+        //                 env.QA_REPO,
+        //                 env.DEV_IMAGE_TAG,
+        //                 'QA'
+        //             )
+        //             env.IMAGE_URI ="${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
+        //             echo "QA IMAGE URI = ${env.IMAGE_URI}"
+        //         }
+        //     }
+        // }
 
-        stage('Deploy Frontend - QA') {
-            steps {
-                script {
-                    deployFrontend(
-                        'qa',
-                        env.QA_REPO,
-                        env.QA_IMAGE_TAG
-                    )
-                }
-            }
-        }
+        // stage('Deploy Frontend - QA') {
+        //     steps {
+        //         script {
+        //             deployFrontend(
+        //                 'qa',
+        //                 env.QA_REPO,
+        //                 env.QA_IMAGE_TAG
+        //             )
+        //         }
+        //     }
+        // }
 
         // stage('Promote Frontend - DEV to UAT') {
         //     steps {
@@ -155,41 +155,41 @@ pipeline {
         //     }
         // }
 
-        // stage('Production Approval') {
-        //     steps {
-        //         input(
-        //             message: 'UAT deployment completed. Deploy Frontend to PROD?',
-        //             ok: 'Deploy to PROD'
-        //         )
-        //     }
-        // }
+        stage('Promote Frontend - DEV to PROD') {
+            steps {
+                script {
+                    env.PROD_IMAGE_TAG = promoteImage(
+                        env.DEV_REPO,
+                        env.PROD_REPO,
+                        env.DEV_IMAGE_TAG,
+                        'PROD'
+                    )
+                    env.IMAGE_URI ="${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
+                    echo "PROD IMAGE URI = ${env.IMAGE_URI}"
+                }
+            }
+        }
 
-        // stage('Promote Frontend - DEV to PROD') {
-        //     steps {
-        //         script {
-        //             env.PROD_IMAGE_TAG = promoteImage(
-        //                 env.DEV_REPO,
-        //                 env.PROD_REPO,
-        //                 env.DEV_IMAGE_TAG,
-        //                 'PROD'
-        //             )
-        //             env.IMAGE_URI ="${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
-        //             echo "PROD IMAGE URI = ${env.IMAGE_URI}"
-        //         }
-        //     }
-        // }
+        stage('Production Approval') {
+            steps {
+                input(
+                    message: 'UAT deployment completed. Deploy Frontend to PROD?',
+                    ok: 'Deploy to PROD'
+                )
+            }
+        }
 
-        // stage('Deploy Frontend - PROD') {
-        //     steps {
-        //         script {
-        //             deployFrontend(
-        //                 'prod',
-        //                 env.PROD_REPO,
-        //                 env.PROD_IMAGE_TAG
-        //             )
-        //         }
-        //     }
-        // }
+        stage('Deploy Frontend - PROD') {
+            steps {
+                script {
+                    deployFrontend(
+                        'prod',
+                        env.PROD_REPO,
+                        env.PROD_IMAGE_TAG
+                    )
+                }
+            }
+        }
     }
 
     post {
