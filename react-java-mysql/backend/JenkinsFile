@@ -8,9 +8,9 @@ pipeline {
         AWS_CRED       = 'AWS'
         ECR_REGISTRY ="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         DEV_REPO  = 'app-3-dev-backend'
-        QA_REPO   = 'app-3-qa-backend'
+        // QA_REPO   = 'app-3-qa-backend'
         // UAT_REPO  = 'app-3-uat-backend'
-        // PROD_REPO = 'app-3-prod-backend'
+        PROD_REPO = 'app-3-prod-backend'
         BUILD_CONTEXT ='./react-java-mysql/backend'
         TASK_DEFINITION_TEMPLATE ='./react-java-mysql/backend/task-definition.json'
     }
@@ -100,30 +100,30 @@ pipeline {
         //     }
         // }
 
-        stage('QA - Promote Backend Image') {
-            steps {
-                script {
-                    env.QA_IMAGE_TAG = promoteImage(
-                        env.DEV_REPO,
-                        env.QA_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'QA'
-                    )
-                }
-            }
-        }
+        // stage('QA - Promote Backend Image') {
+        //     steps {
+        //         script {
+        //             env.QA_IMAGE_TAG = promoteImage(
+        //                 env.DEV_REPO,
+        //                 env.QA_REPO,
+        //                 env.DEV_IMAGE_TAG,
+        //                 'QA'
+        //             )
+        //         }
+        //     }
+        // }
 
-        stage('Deploy Backend - QA') {
-            steps {
-                script {
-                    deployBackend(
-                        'qa',
-                        env.QA_REPO,
-                        env.QA_IMAGE_TAG
-                    )
-                }
-            }
-        }
+        // stage('Deploy Backend - QA') {
+        //     steps {
+        //         script {
+        //             deployBackend(
+        //                 'qa',
+        //                 env.QA_REPO,
+        //                 env.QA_IMAGE_TAG
+        //             )
+        //         }
+        //     }
+        // }
 
         // stage('UAT - Promote Backend Image') {
         //     steps {
@@ -150,31 +150,39 @@ pipeline {
         //     }
         // }
 
-        // stage('PROD - Promote Backend Image') {
-        //     steps {
-        //         script {
-        //             env.PROD_IMAGE_TAG = promoteImage(
-        //                 env.UAT_REPO,
-        //                 env.PROD_REPO,
-        //                 env.UAT_IMAGE_TAG,
-        //                 'PROD'
-        //             )
-        //         }
-        //     }
-        // }
+        stage('PROD - Promote Backend Image') {
+            steps {
+                script {
+                    env.PROD_IMAGE_TAG = promoteImage(
+                        env.UAT_REPO,
+                        env.PROD_REPO,
+                        env.UAT_IMAGE_TAG,
+                        'PROD'
+                    )
+                }
+            }
+        }
+        stage('Production Approval') {
+            steps {
+                input(
+                    message: 'UAT deployment completed. Deploy Frontend to PROD?',
+                    ok: 'Deploy to PROD'
+                )
+            }
+        }
 
-        // stage('Deploy Backend - PROD') {
-        //     steps {
-        //         input message: 'Deploy Backend to PROD?', ok: 'Deploy'
-        //         script {
-        //             deployBackend(
-        //                 'prod',
-        //                 env.PROD_REPO,
-        //                 env.PROD_IMAGE_TAG
-        //             )
-        //         }
-        //     }
-        // }
+        stage('Deploy Backend - PROD') {
+            steps {
+                input message: 'Deploy Backend to PROD?', ok: 'Deploy'
+                script {
+                    deployBackend(
+                        'prod',
+                        env.PROD_REPO,
+                        env.PROD_IMAGE_TAG
+                    )
+                }
+            }
+        }
     }
 
     post {
