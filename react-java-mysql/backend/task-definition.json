@@ -25,7 +25,7 @@
         },
         {
           "name": "MYSQL_HOST",
-          "value": "app3-db.app3-dev.local"
+          "value": "app3-db.app3-qa.local"
         },
         {
           "name": "MYSQL_USER",
@@ -36,7 +36,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/app-3-dev-backend",
+          "awslogs-group": "/ecs/app-3-qa-backend",
           "awslogs-create-group": "true",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
