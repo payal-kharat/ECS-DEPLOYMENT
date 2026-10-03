@@ -154,9 +154,9 @@ pipeline {
             steps {
                 script {
                     env.PROD_IMAGE_TAG = promoteImage(
-                        env.UAT_REPO,
+                        env.DEV_REPO,
                         env.PROD_REPO,
-                        env.UAT_IMAGE_TAG,
+                        env.DEV_IMAGE_TAG,
                         'PROD'
                     )
                 }
