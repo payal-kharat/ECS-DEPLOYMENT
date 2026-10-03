@@ -9,9 +9,9 @@ pipeline {
         ECR_REGISTRY ="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
         DEV_REPO  = 'app-3-dev-db'
-        QA_REPO   = 'app-3-qa-db'
+        // QA_REPO   = 'app-3-qa-db'
         // UAT_REPO  = 'app-3-uat-db'
-        // PROD_REPO = 'app-3-prod-db'
+        PROD_REPO = 'app-3-prod-db'
 
         BUILD_CONTEXT ='./react-java-mysql/db'
         TASK_DEFINITION_TEMPLATE ='./react-java-mysql/db/task-definition.json'
@@ -119,33 +119,33 @@ pipeline {
         //     }
         // }
 
-        stage('QA - Promote Image') {
-            steps {
-                script {
-                    promoteImage(
-                        env.DEV_REPO,
-                        env.QA_REPO,
-                        env.DEV_IMAGE_TAG,
-                        'QA'
-                    )
+        // stage('QA - Promote Image') {
+        //     steps {
+        //         script {
+        //             promoteImage(
+        //                 env.DEV_REPO,
+        //                 env.QA_REPO,
+        //                 env.DEV_IMAGE_TAG,
+        //                 'QA'
+        //             )
 
-                    env.QA_IMAGE_TAG ="QA-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-                    env.QA_IMAGE_URI ="${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
-                }
-            }
-        }
+        //             env.QA_IMAGE_TAG ="QA-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
+        //             env.QA_IMAGE_URI ="${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
+        //         }
+        //     }
+        // }
 
-        stage('Deploy DB - QA') {
-            steps {
-                script {
-                    deployDB(
-                        'qa',
-                        env.QA_REPO,
-                        env.QA_IMAGE_TAG
-                    )
-                }
-            }
-        }
+        // stage('Deploy DB - QA') {
+        //     steps {
+        //         script {
+        //             deployDB(
+        //                 'qa',
+        //                 env.QA_REPO,
+        //                 env.QA_IMAGE_TAG
+        //             )
+        //         }
+        //     }
+        // }
 
     //     stage('UAT - Promote Image') {
     //         steps {
@@ -174,44 +174,45 @@ pipeline {
     //         }
     //     }
 
-    //     stage('Production Approval') {
-    //         steps {
-    //             input(
-    //                 message:
-    //                     'DEV, QA and UAT DB deployment completed. Deploy APP-3 DB to PROD?',
-    //                 ok:
-    //                     'Deploy to PROD'
-    //             )
-    //         }
-    //     }
 
-    //     stage('PROD - Promote Image') {
-    //         steps {
-    //             script {
-    //                 promoteImage(
-    //                     env.DEV_REPO,
-    //                     env.PROD_REPO,
-    //                     env.DEV_IMAGE_TAG,
-    //                     'PROD'
-    //                 )
+        stage('PROD - Promote Image') {
+            steps {
+                script {
+                    promoteImage(
+                        env.DEV_REPO,
+                        env.PROD_REPO,
+                        env.DEV_IMAGE_TAG,
+                        'PROD'
+                    )
 
-    //                 env.PROD_IMAGE_TAG ="PROD-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-    //                 env.PROD_IMAGE_URI ="${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
-    //             }
-    //         }
-    //     }
+                    env.PROD_IMAGE_TAG ="PROD-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
+                    env.PROD_IMAGE_URI ="${env.ECR_REGISTRY}/${env.PROD_REPO}:${env.PROD_IMAGE_TAG}"
+                }
+            }
+        }
 
-    //     stage('Deploy DB - PROD') {
-    //         steps {
-    //             script {
-    //                 deployDB(
-    //                     'prod',
-    //                     env.PROD_REPO,
-    //                     env.PROD_IMAGE_TAG
-    //                 )
-    //             }
-    //         }
-    //     }
+        stage('Production Approval') {
+            steps {
+                input(
+                    message:
+                        'DEV, QA and UAT DB deployment completed. Deploy APP-3 DB to PROD?',
+                    ok:
+                        'Deploy to PROD'
+                )
+            }
+        }
+
+        stage('Deploy DB - PROD') {
+            steps {
+                script {
+                    deployDB(
+                        'prod',
+                        env.PROD_REPO,
+                        env.PROD_IMAGE_TAG
+                    )
+                }
+            }
+        }
     }
 
     post {
