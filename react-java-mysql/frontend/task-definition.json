@@ -18,7 +18,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/app-3-dev-frontend",
+          "awslogs-group": "/ecs/app-3-qa-frontend",
           "awslogs-create-group": "true",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
@@ -28,9 +28,9 @@
       "systemControls": []
     }
   ],
-  "family": "app-3-dev-frontend",
+  "family": "app-3-qa-frontend",
   "executionRoleArn": "arn:aws:iam::552940445807:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::552940445807:role/app-3-dev-ecs-task-role",
+  "taskRoleArn": "arn:aws:iam::552940445807:role/app-3-qa-ecs-task-role",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
