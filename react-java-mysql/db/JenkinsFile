@@ -1,39 +1,28 @@
 
 pipeline {
-
     agent any
-
     environment {
 
         AWS_REGION     = 'us-east-1'
         AWS_ACCOUNT_ID = '552940445807'
-
         AWS_CRED = 'AWS'
-
         ECR_REGISTRY ="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
         DEV_REPO  = 'app-3-dev-db'
-        // QA_REPO   = 'app-3-qa-db'
+        QA_REPO   = 'app-3-qa-db'
         // UAT_REPO  = 'app-3-uat-db'
         // PROD_REPO = 'app-3-prod-db'
 
         BUILD_CONTEXT ='./react-java-mysql/db'
-
-
         TASK_DEFINITION_TEMPLATE ='./react-java-mysql/db/task-definition.json'
     }
 
 
     stages {
-
         stage('Checkout') {
-
             steps {
-
                 checkout scm
-
                 script {
-
                     env.COMMIT_ID =
                         sh(
                             script: 'git rev-parse --short=7 HEAD',
@@ -48,21 +37,11 @@ pipeline {
         }
 
         stage('DEV - Build Image') {
-
             steps {
-
                 script {
 
-                    /*
-                     * Example:
-                     *
-                     * DEV-def5678-25
-                     */
-
                     def imageTag ="DEV-${env.COMMIT_ID}-${env.BUILD_NUMBER}"
-
                     env.DEV_IMAGE_TAG =imageTag
-
                     def imageUri ="${env.ECR_REGISTRY}/${env.DEV_REPO}:${imageTag}"
                     env.DEV_IMAGE_URI =imageUri
 
@@ -75,9 +54,7 @@ pipeline {
                     echo "IMAGE URI         = ${imageUri}"
                     echo "======================================"
 
-
                     echo "Building APP-3 DB Docker image..."
-
 
                     docker.withRegistry(
                         "https://${env.ECR_REGISTRY}",
@@ -97,13 +74,9 @@ pipeline {
         }
 
         stage('DEV - Push Image') {
-
             steps {
-
                 script {
-
                     if (!env.DEV_IMAGE_URI?.trim()) {
-
                         error(
                             "DEV_IMAGE_URI is empty. " +
                             "DEV image was not built successfully."
@@ -134,66 +107,49 @@ pipeline {
             }
         }
 
-        stage('Deploy DB - DEV') {
+        // stage('Deploy DB - DEV') {
+        //     steps {
+        //         script {
+        //             deployDB(
+        //                 'dev',
+        //                 env.DEV_REPO,
+        //                 env.DEV_IMAGE_TAG
+        //             )
+        //         }
+        //     }
+        // }
 
+        stage('QA - Promote Image') {
             steps {
-
                 script {
-
-                    deployDB(
-                        'dev',
+                    promoteImage(
                         env.DEV_REPO,
-                        env.DEV_IMAGE_TAG
+                        env.QA_REPO,
+                        env.DEV_IMAGE_TAG,
+                        'QA'
+                    )
+
+                    env.QA_IMAGE_TAG ="QA-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
+                    env.QA_IMAGE_URI ="${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Deploy DB - QA') {
+            steps {
+                script {
+                    deployDB(
+                        'qa',
+                        env.QA_REPO,
+                        env.QA_IMAGE_TAG
                     )
                 }
             }
         }
 
-        // stage('QA - Promote Image') {
-
-        //     steps {
-
-        //         script {
-
-        //             promoteImage(
-        //                 env.DEV_REPO,
-        //                 env.QA_REPO,
-        //                 env.DEV_IMAGE_TAG,
-        //                 'QA'
-        //             )
-
-
-        //             env.QA_IMAGE_TAG =
-        //                 "QA-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-
-
-        //             env.QA_IMAGE_URI =
-        //                 "${env.ECR_REGISTRY}/${env.QA_REPO}:${env.QA_IMAGE_TAG}"
-        //         }
-        //     }
-        // }
-
-        // stage('Deploy DB - QA') {
-
-        //     steps {
-
-        //         script {
-
-        //             deployDB(
-        //                 'qa',
-        //                 env.QA_REPO,
-        //                 env.QA_IMAGE_TAG
-        //             )
-        //         }
-        //     }
-        // }
-
     //     stage('UAT - Promote Image') {
-
     //         steps {
-
     //             script {
-
     //                 promoteImage(
     //                     env.DEV_REPO,
     //                     env.UAT_REPO,
@@ -201,22 +157,14 @@ pipeline {
     //                     'UAT'
     //                 )
 
-
-    //                 env.UAT_IMAGE_TAG =
-    //                     "UAT-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
-
-
-    //                 env.UAT_IMAGE_URI =
-    //                     "${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
+    //                 env.UAT_IMAGE_TAG ="UAT-${env.DEV_IMAGE_TAG.replaceFirst('^DEV-', '')}"
+    //                 env.UAT_IMAGE_URI ="${env.ECR_REGISTRY}/${env.UAT_REPO}:${env.UAT_IMAGE_TAG}"
     //             }
     //         }
     //     }
     //     stage('Deploy DB - UAT') {
-
     //         steps {
-
     //             script {
-
     //                 deployDB(
     //                     'uat',
     //                     env.UAT_REPO,
@@ -227,13 +175,10 @@ pipeline {
     //     }
 
     //     stage('Production Approval') {
-
     //         steps {
-
     //             input(
     //                 message:
     //                     'DEV, QA and UAT DB deployment completed. Deploy APP-3 DB to PROD?',
-
     //                 ok:
     //                     'Deploy to PROD'
     //             )
@@ -241,11 +186,8 @@ pipeline {
     //     }
 
     //     stage('PROD - Promote Image') {
-
     //         steps {
-
     //             script {
-
     //                 promoteImage(
     //                     env.DEV_REPO,
     //                     env.PROD_REPO,
@@ -260,11 +202,8 @@ pipeline {
     //     }
 
     //     stage('Deploy DB - PROD') {
-
     //         steps {
-
     //             script {
-
     //                 deployDB(
     //                     'prod',
     //                     env.PROD_REPO,
@@ -276,17 +215,13 @@ pipeline {
     }
 
     post {
-
         always {
-
             echo 'Cleaning Jenkins workspace...'
-
             cleanWs()
         }
 
 
         success {
-
             echo '''
 ============================================================
 APP-3 DB ECS CI/CD completed successfully.
@@ -295,10 +230,7 @@ DEV  → QA → UAT → PROD
 ============================================================
 '''
         }
-
-
         failure {
-
             echo '''
 ============================================================
 APP-3 DB ECS CI/CD FAILED.
@@ -316,17 +248,9 @@ def promoteImage(
     String targetEnvironment
 ) {
 
-    def sourceImage =
-        "${env.ECR_REGISTRY}/${sourceRepo}:${sourceTag}"
-
-
-    def targetTag =
-        "${targetEnvironment}-${sourceTag.replaceFirst('^DEV-', '')}"
-
-
-    def targetImage =
-        "${env.ECR_REGISTRY}/${targetRepo}:${targetTag}"
-
+    def sourceImage ="${env.ECR_REGISTRY}/${sourceRepo}:${sourceTag}"
+    def targetTag ="${targetEnvironment}-${sourceTag.replaceFirst('^DEV-', '')}"
+    def targetImage ="${env.ECR_REGISTRY}/${targetRepo}:${targetTag}"
 
     echo "============================================================"
     echo "PROMOTING APP-3 DB IMAGE"
@@ -349,12 +273,9 @@ def promoteImage(
             set -e
 
             echo "AWS Identity:"
-
             aws sts get-caller-identity
 
-
             echo "Logging in to ECR..."
-
             aws ecr get-login-password \
                 --region ${env.AWS_REGION} \
                 | docker login \
@@ -363,10 +284,7 @@ def promoteImage(
 
 
             echo "Pulling DEV image..."
-
             docker pull ${sourceImage}
-
-
             echo "Tagging image..."
 
             docker tag \
@@ -375,7 +293,6 @@ def promoteImage(
 
 
             echo "Pushing promoted image..."
-
             docker push ${targetImage}
 
 
@@ -394,7 +311,6 @@ def deployDB(
 ) {
 
     def imageUri ="${env.ECR_REGISTRY}/${repository}:${imageTag}"
-
     def taskDefinitionFile ="new-db-task-definition-${environment}.json"
 
     echo "============================================================"
@@ -438,35 +354,24 @@ image_uri = os.environ["IMAGE_URI"]
 
 
 # Read original task definition
-
 with open(input_file, "r") as f:
-
     task_definition = json.load(f)
 
-
 # Set environment-specific family
-
 task_definition["family"] = \
     f"app-3-{environment}-db"
 
 
 # Update DB container image
-
 container_found = False
-
 for container in task_definition["containerDefinitions"]:
-
     if container["name"] == "db":
-
         container["image"] = image_uri
-
         container_found = True
-
         break
 
 
 if not container_found:
-
     raise Exception(
         "Container named 'db' was not found."
     )
@@ -485,7 +390,6 @@ remove_fields = [
 
 
 for field in remove_fields:
-
     task_definition.pop(
         field,
         None
@@ -504,7 +408,6 @@ with open(output_file, "w") as f:
 
 print("Task definition created:")
 print(output_file)
-
 print("DB image:")
 print(image_uri)
 
@@ -512,7 +415,6 @@ PYTHON
 
 
             echo "Generated task definition:"
-
             cat ${taskDefinitionFile}
             echo "Registering ECS task definition..."
             REVISION=\$(aws ecs register-task-definition \
@@ -524,13 +426,11 @@ PYTHON
 
             echo "AWS REGISTERED REVISION = \$REVISION"
 
-
             if [ -z "\$REVISION" ] || \
                [ "\$REVISION" = "null" ] || \
                [ "\$REVISION" = "None" ]; then
 
                 echo "ERROR: ECS returned invalid revision."
-
                 exit 1
 
             fi
